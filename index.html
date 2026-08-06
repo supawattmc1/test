@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบฟอร์มตรวจนับครุภัณฑ์</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Eczar:wght@600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --ink: #17312c;
+      --teal: #0f766e;
+      --soft-teal: #e6f4f1;
+      --line: #d6e2de;
+      --paper: #fffdf8;
+      --warm: #f4efe4;
+      --danger: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 100%;
+      font-family: "Libre Franklin", "Kanit", sans-serif;
+      color: var(--ink);
+      background-color: var(--warm);
+    }
+
+    .app-shell {
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      background-image:
+        linear-gradient(90deg, rgba(15, 118, 110, 0.035) 1px, transparent 1px),
+        linear-gradient(rgba(15, 118, 110, 0.035) 1px, transparent 1px);
+      background-size: 26px 26px;
+    }
+
+    .paper-panel {
+      background: rgba(255, 253, 248, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 42px rgba(23, 49, 44, 0.10);
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 0.45rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #31554e;
+    }
+
+    .field-control {
+      width: 100%;
+      border: 1px solid #c8d8d3;
+      border-radius: 0.7rem;
+      background: #ffffff;
+      color: #17312c;
+      padding: 0.72rem 0.82rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .field-control:focus {
+      border-color: #0f766e;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    .field-control:disabled {
+      opacity: 0.62;
+      cursor: not-allowed;
+      background: #f4f7f6;
+    }
+
+    .section-title {
+      font-family: "Eczar", serif;
+      color: #174a43;
+      letter-spacing: -0.02em;
+    }
+
+    .status-message {
+      min-height: 1.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-success { color: #087443; }
+    .status-error { color: var(--danger); }
+    .status-neutral { color: #58716b; }
+
+    .reveal {
+      animation: rise .55s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-row {
+      transition: background .18s ease;
+    }
+
+    .result-row:hover { background: #f2faf7; }
+
+    .action-icon {
+      width: 1rem;
+      height: 1rem;
+      pointer-events: none;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.3rem 0.58rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-found { background: #d9f5e9; color: #087443; }
+    .badge-missing { background: #fde7e5; color: #b42318; }
+    .badge-normal { background: #e5f2ee; color: #216052; }
+    .badge-warning { background: #fff2d5; color: #8a5a0a; }
+    .badge-diff { background: #edf0ef; color: #425a53; }
+
+    /* Custom Scrollbar for Modal */
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #c8d8d3; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a3b8b1; }
+
+    @media (max-width: 640px) {
+      .table-scroll { margin-left: -1rem; margin-right: -1rem; }
+      .table-scroll > div { padding-left: 1rem; padding-right: 1rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="canva-header border-b border-teal-900/10">
+      <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+        <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div class="flex items-center gap-3 text-teal-800">
+              <div class="w-10 h-10 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-md">
+                <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+              </div>
+              <p class="canva-text text-xs font-bold tracking-[0.18em] uppercase">ระบบจัดการคลัง</p>
+            </div>
+            <h1 class="canva-text section-title mt-3 font-bold text-3xl">ระบบแบบฟอร์มตรวจนับครุภัณฑ์</h1>
+            <p class="canva-text mt-2 max-w-2xl text-sm leading-6">บันทึกข้อมูลและตรวจสอบสถานะการนับครุภัณฑ์ประจำปี เพื่อสรุปยอดและจัดการทรัพย์สิน</p>
+          </div>
+          <div class="canva-card rounded-2xl px-5 py-4 min-w-[190px] bg-white border border-teal-900/10 shadow-sm">
+            <p class="canva-text text-xs font-bold uppercase tracking-[0.12em] text-teal-700">จำนวนที่บันทึกแล้ว</p>
+            <p id="record-count" class="mt-1 text-3xl font-extrabold text-teal-800" aria-live="polite">0</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden">
+        <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="canva-text section-title font-bold text-xl">บันทึกข้อมูลครุภัณฑ์</h2>
+            <p class="canva-text mt-1 text-sm text-gray-600">กรอกแบบฟอร์มด้านล่างเพื่อเพิ่มข้อมูลใหม่หรืออัปเดตข้อมูล</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-semibold text-teal-800 bg-teal-50 px-3 py-2 rounded-full">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> 
+            <span class="canva-text">ข้อมูลถูกจัดการในระบบอย่างปลอดภัย</span>
+          </div>
+        </div>
+        
+        <form id="asset-form" class="px-5 sm:px-8 py-7" novalidate>
+          <section aria-labelledby="asset-info-heading">
+            <h3 id="asset-info-heading" class="canva-text section-title font-bold border-l-4 border-teal-700 pl-3">ข้อมูลพื้นฐานครุภัณฑ์</h3>
+            <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div><label class="canva-text field-label" for="department">แผนก / หน่วยงาน</label> <input id="department" class="field-control" type="text" required></div>
+              <div><label class="canva-text field-label" for="asset-code">รหัสครุภัณฑ์</label> <input id="asset-code" class="field-control" type="text" required></div>
+              <div><label class="canva-text field-label" for="asset-name">ชื่อครุภัณฑ์</label> <input id="asset-name" class="field-control" type="text" required></div>
+              <div><label class="canva-text field-label" for="category">หมวดหมู่</label> <input id="category" class="field-control" type="text"></div>
+              <div><label class="canva-text field-label" for="brand-model">ยี่ห้อ / รุ่น</label> <input id="brand-model" class="field-control" type="text"></div>
+              <div><label class="canva-text field-label" for="location">สถานที่ตั้ง</label> <input id="location" class="field-control" type="text"></div>
+            </div>
+          </section>
+
+          <section class="mt-8 pt-7 border-t border-dashed border-teal-900/20" aria-labelledby="count-info-heading">
+            <h3 id="count-info-heading" class="canva-text section-title font-bold border-l-4 border-teal-700 pl-3">ข้อมูลการตรวจนับ</h3>
+            <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+              <div>
+                <label class="canva-text field-label" for="condition">สภาพ</label> 
+                <select id="condition" class="field-control" required> 
+                  <option value="">เลือกสภาพ</option> 
+                  <option value="ปกติ">ปกติ</option> 
+                  <option value="ชำรุดเล็กน้อย">ชำรุดเล็กน้อย</option> 
+                  <option value="ชำรุด">ชำรุด</option> 
+                  <option value="รอจำหน่าย">รอจำหน่าย</option> 
+                </select>
+              </div>
+              <div>
+                <label class="canva-text field-label" for="inspection-result">ผลตรวจนับ</label> 
+                <select id="inspection-result" class="field-control" required> 
+                  <option value="">เลือกผลตรวจนับ</option> 
+                  <option value="พบ">พบ</option> 
+                  <option value="ไม่พบ">ไม่พบ</option> 
+                </select>
+              </div>
+              
+              <!-- ช่องใส่ตัวเลข (จำนวนปกติ, ชำรุด, รวมทั้งหมด) -->
+              <div><label class="canva-text field-label" for="good-qty">จำนวนปกติ</label> <input id="good-qty" class="field-control" type="number" min="0" step="1" value="1" required></div>
+              <div><label class="canva-text field-label" for="damaged-qty">จำนวนที่ชำรุด</label> <input id="damaged-qty" class="field-control" type="number" min="0" step="1" value="0" required></div>
+              <div>
+                <label class="canva-text field-label" for="total-qty">รวมทั้งหมด (อัตโนมัติ)</label> 
+                <input id="total-qty" class="field-control bg-teal-50/50 font-bold text-teal-800 border-teal-200 cursor-not-allowed focus:ring-0" type="number" readonly value="1" tabindex="-1">
+              </div>
+              
+              <div class="md:col-span-2 xl:col-span-5"><label class="canva-text field-label" for="remarks">หมายเหตุการตรวจนับ</label> <textarea id="remarks" class="field-control resize-y min-h-[46px]" rows="2"></textarea></div>
+            </div>
+          </section>
+
+          <section class="mt-8 pt-7 border-t border-dashed border-teal-900/20" aria-labelledby="people-info-heading">
+            <h3 id="people-info-heading" class="canva-text section-title font-bold border-l-4 border-teal-700 pl-3">ข้อมูลบุคคลและวันที่</h3>
+            <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div><label class="canva-text field-label" for="responsible-person">ผู้รับผิดชอบ</label> <input id="responsible-person" class="field-control" type="text"></div>
+              <div><label class="canva-text field-label" for="inspector">ผู้ตรวจนับ</label> <input id="inspector" class="field-control" type="text" required></div>
+              <div><label class="canva-text field-label" for="inspection-date">วันที่ตรวจนับ</label> <input id="inspection-date" class="field-control" type="date" required></div>
+              <div><label class="canva-text field-label" for="acquisition-date">วันที่ได้มา (ถ้ามี)</label> <input id="acquisition-date" class="field-control" type="date"></div>
+              <div class="md:col-span-2 xl:col-span-4"><label class="canva-text field-label" for="related-remarks">บันทึกเพิ่มเติม</label> <textarea id="related-remarks" class="field-control resize-y min-h-[46px]" rows="2"></textarea></div>
+            </div>
+          </section>
+
+          <div class="mt-7 pt-6 border-t border-teal-900/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p id="form-status" class="status-message status-neutral" role="status" aria-live="polite"></p>
+            <div class="flex flex-wrap gap-3">
+              <button id="clear-button" class="canva-button inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold border border-teal-800/20 transition hover:bg-teal-50 focus:outline-none focus:ring-4 focus:ring-teal-200" type="button"> 
+                <i data-lucide="rotate-ccw" class="action-icon"></i> 
+                <span>ล้างข้อมูล</span>
+              </button> 
+              <button id="save-button" class="canva-button bg-teal-800 text-white inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold shadow-lg shadow-teal-800/20 transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" type="submit"> 
+                <i data-lucide="save" class="action-icon"></i> 
+                <span id="save-button-text" class="canva-text">บันทึกข้อมูล</span> 
+                <span id="save-loading" class="hidden items-center gap-2"> 
+                  <i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i> 
+                  <span class="canva-text">กำลังบันทึก...</span> 
+                </span> 
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden mt-8" style="animation-delay: .1s;">
+        <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="canva-text section-title font-bold text-xl">รายการที่ตรวจนับแล้ว</h2>
+            <p class="canva-text mt-1 text-sm text-gray-600">รายการจะถูกจัดกลุ่มรวมกันอัตโนมัติหากมีผู้รับผิดชอบชื่อเดียวกัน</p>
+          </div>
+          <div class="relative w-full lg:w-[360px]">
+            <label class="canva-text sr-only" for="search-input">ค้นหา</label> 
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-700"></i> 
+            <input id="search-input" class="canva-input field-control pl-10" type="search" placeholder="ค้นหา รหัส, ชื่อ, แผนก, ผู้รับผิดชอบ...">
+          </div>
+        </div>
+        <div class="px-5 sm:px-8 pt-4">
+          <p id="list-status" class="status-message status-neutral" role="status" aria-live="polite"></p>
+        </div>
+        <div class="table-scroll">
+          <div class="overflow-x-auto px-5 sm:px-8 pb-7">
+            <table class="w-full min-w-[1080px] text-left border-separate border-spacing-0">
+              <thead>
+                <tr class="text-xs uppercase tracking-[0.08em] text-teal-800 bg-teal-50">
+                  <th class="px-4 py-3 font-bold rounded-tl-xl">รหัสครุภัณฑ์</th>
+                  <th class="px-4 py-3 font-bold">ชื่อครุภัณฑ์</th>
+                  <th class="px-4 py-3 font-bold">แผนก</th>
+                  <th class="px-4 py-3 font-bold">สถานที่ตั้ง</th>
+                  <th class="px-4 py-3 font-bold">สถานะ / สภาพ</th>
+                  <th class="px-4 py-3 font-bold">จำนวนรวม</th>
+                  <th class="px-4 py-3 font-bold">จำนวนปกติ</th>
+                  <th class="px-4 py-3 font-bold">จำนวนชำรุด</th>
+                  <th class="px-4 py-3 font-bold">วันที่ตรวจ / ผู้ตรวจ</th>
+                  <th class="px-4 py-3 font-bold rounded-tr-xl">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="asset-list"></tbody>
+            </table>
+            <div id="empty-state" class="canva-banner rounded-2xl text-center py-12 px-6 mt-5 border border-dashed border-teal-800/20">
+              <div class="mx-auto w-12 h-12 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center">
+                <i data-lucide="inbox" class="w-6 h-6"></i>
+              </div>
+              <h3 class="canva-text mt-4 font-bold text-lg text-teal-900">ยังไม่มีข้อมูลในระบบ</h3>
+              <p class="canva-text mt-1 text-sm text-teal-700">กรุณากรอกแบบฟอร์มด้านบนเพื่อบันทึกข้อมูลการตรวจนับ</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal สำหรับดูรายละเอียดและประวัติ (View Details Modal) -->
+  <div id="view-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar reveal">
+      <div class="sticky top-0 z-10 px-6 py-5 border-b border-teal-900/10 flex justify-between items-center bg-teal-50/95 backdrop-blur">
+        <h3 class="text-xl font-bold text-teal-900 font-['Eczar'] flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5"></i> รายละเอียดข้อมูลที่บันทึก
+        </h3>
+        <button id="close-modal-btn" class="p-2 rounded-full hover:bg-teal-200 text-teal-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="px-6 py-5 space-y-6">
+        <!-- ข้อมูลล่าสุด -->
+        <div>
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลพื้นฐานครุภัณฑ์</h4>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
+            <div><span class="block text-slate-500 text-xs mb-1">รหัสครุภัณฑ์</span><strong id="v-code" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">ชื่อครุภัณฑ์</span><strong id="v-name" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">แผนก / หน่วยงาน</span><strong id="v-dept" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">หมวดหมู่</span><strong id="v-cat" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">ยี่ห้อ / รุ่น</span><strong id="v-brand" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">สถานที่ตั้ง</span><strong id="v-loc" class="text-teal-900"></strong></div>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลการตรวจนับ</h4>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
+            <div><span class="block text-slate-500 text-xs mb-1">สภาพ</span><strong id="v-condition" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">ผลตรวจนับ</span><strong id="v-result" class="text-teal-900"></strong></div>
+            <div class="col-span-1 hidden md:block"></div>
+            <div><span class="block text-slate-500 text-xs mb-1">จำนวนปกติ</span><strong id="v-good" class="text-emerald-700"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">จำนวนชำรุด</span><strong id="v-damaged" class="text-red-700"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">รวมทั้งหมด</span><strong id="v-total" class="text-teal-900 text-lg"></strong></div>
+            <div class="col-span-2 md:col-span-3"><span class="block text-slate-500 text-xs mb-1">หมายเหตุ</span><p id="v-remarks" class="text-teal-900 bg-slate-50 p-3 rounded-lg border border-slate-100"></p></div>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลบุคคลและเวลา</h4>
+          <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+            <div><span class="block text-slate-500 text-xs mb-1">ผู้ตรวจนับ</span><strong id="v-inspector" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">ผู้รับผิดชอบ</span><strong id="v-responsible" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">วันที่ตรวจนับ</span><strong id="v-date" class="text-teal-900"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">วันที่ได้มา</span><strong id="v-acq-date" class="text-teal-900"></strong></div>
+            <div class="col-span-2"><span class="block text-slate-500 text-xs mb-1">บันทึกเพิ่มเติม</span><p id="v-rel-remarks" class="text-teal-900 bg-slate-50 p-3 rounded-lg border border-slate-100"></p></div>
+          </div>
+        </div>
+
+        <!-- ส่วนแสดงรายการย่อยในกลุ่มผู้รับผิดชอบ -->
+        <div id="v-group-items-container" class="hidden mt-6 pt-4 border-t border-dashed border-teal-900/20">
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3 flex items-center justify-between">
+            <span>รายการครุภัณฑ์ทั้งหมดในกลุ่มนี้</span>
+            <span id="v-group-count" class="bg-teal-100 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold">0 รายการ</span>
+          </h4>
+          <div id="v-group-items-list" class="space-y-3"></div>
+        </div>
+
+        <!-- ส่วนประวัติการแก้ไข (แสดงเมื่อปุ่มถูกกด) -->
+        <div class="mt-6 pt-4 border-t border-dashed border-teal-900/20">
+          <button id="toggle-history-btn" class="hidden w-full flex items-center justify-between gap-2 text-sm font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 p-3 rounded-xl transition focus:outline-none">
+            <span class="flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> ดูประวัติการแก้ไข</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300" id="history-chevron"></i>
+          </button>
+          
+          <div id="history-container" class="hidden mt-4 space-y-4">
+            <!-- ข้อมูลประวัติจะถูกสร้างที่นี่โดย JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <template id="row-template">
+    <tr class="result-row border-b border-teal-900/10" data-row-id="">
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-code font-bold text-sm text-teal-900"></p><p class="row-category mt-1 text-xs text-slate-500"></p></td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-name font-semibold text-sm"></p><p class="row-brand mt-1 text-xs text-slate-500"></p></td>
+      <td class="row-department px-4 py-4 align-top border-b border-teal-900/10 text-sm"></td>
+      <td class="row-location px-4 py-4 align-top border-b border-teal-900/10 text-sm"></td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><span class="row-result badge"></span> <p class="row-condition mt-2 text-xs"></p></td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-qty text-sm font-semibold text-teal-900 bg-teal-50 px-2 py-1 rounded inline-block"></p></td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-good-qty text-sm font-semibold text-emerald-700"></p>
+        <div class="mt-2 inline-flex items-center gap-1 rounded-lg bg-emerald-50 p-1">
+          <button type="button" class="decrease-good-button inline-flex h-7 w-7 items-center justify-center rounded-md text-emerald-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-300" aria-label="ลดจำนวนที่ดี"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
+          <button type="button" class="increase-good-button inline-flex h-7 w-7 items-center justify-center rounded-md text-emerald-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-300" aria-label="เพิ่มจำนวนที่ดี"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+        </div>
+      </td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-damaged-qty text-sm font-semibold text-red-700"></p>
+        <div class="mt-2 inline-flex items-center gap-1 rounded-lg bg-red-50 p-1">
+          <button type="button" class="decrease-damaged-button inline-flex h-7 w-7 items-center justify-center rounded-md text-red-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-300" aria-label="ลดจำนวนที่ชำรุด"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
+          <button type="button" class="increase-damaged-button inline-flex h-7 w-7 items-center justify-center rounded-md text-red-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-300" aria-label="เพิ่มจำนวนที่ชำรุด"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+        </div>
+      </td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-date text-sm"></p><p class="row-inspector mt-1 text-xs text-slate-500"></p></td>
+      <td class="px-4 py-4 align-top border-b border-teal-900/10">
+        <div class="flex flex-col gap-2">
+          <button type="button" class="view-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-4 focus:ring-blue-100"> 
+            <i data-lucide="eye" class="w-3.5 h-3.5"></i> <span>ดูรายละเอียด</span> 
+          </button>
+          <button type="button" class="edit-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 focus:outline-none focus:ring-4 focus:ring-teal-100"> 
+            <i data-lucide="pencil" class="w-3.5 h-3.5"></i> <span>แก้ไข</span> 
+          </button> 
+          <button type="button" class="delete-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-100"> 
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> <span>ลบ</span> 
+          </button>
+          <div class="confirm-delete hidden flex-col items-center gap-2 mt-1">
+            <span class="text-xs text-red-700 font-bold">ลบแน่หรือ?</span>
+            <div class="flex gap-1">
+              <button type="button" class="confirm-delete-button rounded-lg px-2 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-800">ใช่</button> 
+              <button type="button" class="cancel-delete-button rounded-lg px-2 py-1 text-xs font-bold text-teal-800 bg-teal-100 hover:bg-teal-200">ไม่</button>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <script>
+    // ----------------------------------------------------
+    // REAL BACKEND SDK (Google Sheets API)
+    // ----------------------------------------------------
+    
+    const API_URL = "https://script.google.com/macros/s/AKfycbxcOQu6fxmMaju1pa3qn3zHsUWPRjsQkyXGcf2qu3r0w4oStf3Wk6hM52EhRQhsjW3h/exec"; 
+
+    window.dataSdk = {
+      mockData: [],
+      
+      async init(handler) {
+        this.handler = handler;
+        try {
+          const res = await fetch(API_URL);
+          const result = await res.json();
+          if (result.status === 'success') {
+            this.mockData = result.data || [];
+            this.handler.onDataChanged(this.mockData);
+            return { isOk: true };
+          }
+        } catch (e) { console.error("Init Error:", e); }
+        
+        this.handler.onDataChanged([]);
+        return { isOk: false };
+      },
+      
+      async create(record) {
+        try {
+          record.history = []; 
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'create', record: record })
+          });
+          const result = await res.json();
+          
+          if (result.status === 'success') {
+            this.mockData.unshift(result.record);
+            this.handler.onDataChanged(this.mockData);
+            return { isOk: true };
+          }
+        } catch (e) { console.error("Create Error:", e); }
+        return { isOk: false };
+      },
+      
+      async update(record) {
+        try {
+          const idx = this.mockData.findIndex(r => r.__backendId === record.__backendId);
+          if (idx > -1) {
+            const oldRecord = this.mockData[idx];
+            const currentHistory = oldRecord.history || [];
+            const snapshot = { ...oldRecord };
+            delete snapshot.history;
+            snapshot.__editedAt = new Date().toISOString(); 
+            record.history = [...currentHistory, snapshot];
+          }
+
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'update', record: record })
+          });
+          const result = await res.json();
+          
+          if (result.status === 'success') {
+            if (idx > -1) this.mockData[idx] = record;
+            this.handler.onDataChanged(this.mockData);
+            return { isOk: true };
+          }
+        } catch (e) { console.error("Update Error:", e); }
+        return { isOk: false };
+      },
+      
+      async delete(record) {
+        try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'delete', record: record })
+          });
+          const result = await res.json();
+          
+          if (result.status === 'success') {
+            this.mockData = this.mockData.filter(r => r.__backendId !== record.__backendId);
+            this.handler.onDataChanged(this.mockData);
+            return { isOk: true };
+          }
+        } catch (e) { console.error("Delete Error:", e); }
+        return { isOk: false };
+      }
+    };
+    // ----------------------------------------------------
+
+    const state = { records: [], isSaving: false, deletingId: null, editingId: null };
+
+    const form = document.getElementById("asset-form");
+    const saveButton = document.getElementById("save-button");
+    const clearButton = document.getElementById("clear-button");
+    const saveLoading = document.getElementById("save-loading");
+    const saveButtonText = document.getElementById("save-button-text");
+    const formStatus = document.getElementById("form-status");
+    const listStatus = document.getElementById("list-status");
+    const listElement = document.getElementById("asset-list");
+    const emptyState = document.getElementById("empty-state");
+    const recordCount = document.getElementById("record-count");
+    const searchInput = document.getElementById("search-input");
+    const rowTemplate = document.getElementById("row-template");
+    
+    // Modal Elements
+    const viewModal = document.getElementById("view-modal");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    const historyBtn = document.getElementById("toggle-history-btn");
+    const historyContainer = document.getElementById("history-container");
+    const historyChevron = document.getElementById("history-chevron");
+
+    const inputs = {
+      department: document.getElementById("department"),
+      assetCode: document.getElementById("asset-code"),
+      assetName: document.getElementById("asset-name"),
+      category: document.getElementById("category"),
+      brandModel: document.getElementById("brand-model"),
+      location: document.getElementById("location"),
+      condition: document.getElementById("condition"),
+      inspectionResult: document.getElementById("inspection-result"),
+      goodQty: document.getElementById("good-qty"),
+      damagedQty: document.getElementById("damaged-qty"),
+      totalQty: document.getElementById("total-qty"),
+      responsiblePerson: document.getElementById("responsible-person"),
+      inspector: document.getElementById("inspector"),
+      inspectionDate: document.getElementById("inspection-date"),
+      acquisitionDate: document.getElementById("acquisition-date"),
+      relatedRemarks: document.getElementById("related-remarks"),
+      remarks: document.getElementById("remarks")
+    };
+
+    function calculateTotalQty() {
+      const good = parseInt(inputs.goodQty.value) || 0;
+      const damaged = parseInt(inputs.damagedQty.value) || 0;
+      inputs.totalQty.value = good + damaged;
+    }
+    inputs.goodQty.addEventListener("input", calculateTotalQty);
+    inputs.damagedQty.addEventListener("input", calculateTotalQty);
+
+    function setStatus(element, message, type = "neutral") {
+      element.textContent = message;
+      element.className = "status-message status-" + type;
+      if(type !== 'neutral' && message !== '') {
+        setTimeout(() => setStatus(element, "", "neutral"), 4000);
+      }
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(Number(value || 0));
+    }
+
+    function formatDate(isoValue) {
+      if (!isoValue) return "—";
+      const date = new Date(isoValue);
+      if (Number.isNaN(date.getTime())) return "—";
+      return new Intl.DateTimeFormat("th-TH", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+    }
+    
+    function formatDateTime(isoValue) {
+      if (!isoValue) return "—";
+      const date = new Date(isoValue);
+      if (Number.isNaN(date.getTime())) return "—";
+      return new Intl.DateTimeFormat("th-TH", { 
+        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" 
+      }).format(date);
+    }
+
+    function toIsoDate(value) {
+      if (!value) return "";
+      return new Date(value + "T00:00:00").toISOString();
+    }
+
+    function toDateInputValue(isoValue) {
+      if (!isoValue) return "";
+      const date = new Date(isoValue);
+      if (Number.isNaN(date.getTime())) return "";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+
+    function setSaving(isSaving) {
+      state.isSaving = isSaving;
+      saveButton.disabled = isSaving;
+      clearButton.disabled = isSaving;
+      Array.from(form.querySelectorAll(".field-control")).forEach((field) => {
+        field.disabled = isSaving || field.id === "total-qty";
+      });
+      saveButtonText.classList.toggle("hidden", isSaving);
+      saveLoading.classList.toggle("hidden", !isSaving);
+      saveLoading.classList.toggle("inline-flex", isSaving);
+    }
+
+    function filteredRecords() {
+      const term = searchInput.value.trim().toLocaleLowerCase("th-TH");
+      if (!term) return state.records;
+      return state.records.filter((record) => {
+        const searchable = [
+          record.asset_code, record.asset_name, record.department,
+          record.location, record.responsible_person, record.inspector, record.category
+        ].join(" ").toLocaleLowerCase("th-TH");
+        return searchable.includes(term);
+      });
+    }
+
+    // ----------------------------------------------------
+    // ฟังก์ชันจัดกลุ่มข้อมูลตามชื่อผู้รับผิดชอบ / ผู้ตรวจนับ
+    // ----------------------------------------------------
+    function groupRecordsByResponsiblePerson(records) {
+      const map = new Map();
+
+      records.forEach((record, index) => {
+        const keyName = (record.responsible_person || record.inspector || "").trim();
+        const key = keyName !== "" ? keyName : `__unassigned_${record.__backendId || index}`;
+        
+        if (!map.has(key)) {
+          map.set(key, []);
+        }
+        map.get(key).push(record);
+      });
+
+      const result = [];
+      map.forEach((items, key) => {
+        if (items.length === 1) {
+          result.push(items[0]);
+        } else {
+          // คำนวณผลรวมจำนวนต่างๆ
+          const totalGood = items.reduce((sum, item) => {
+            const g = item.good_qty !== undefined ? Number(item.good_qty) : Math.max(0, Number(item.actual_qty || 0) - Number(item.damaged_qty || 0));
+            return sum + g;
+          }, 0);
+          
+          const totalDamaged = items.reduce((sum, item) => sum + Number(item.damaged_qty || 0), 0);
+          const totalActual = totalGood + totalDamaged;
+
+          const codes = Array.from(new Set(items.map(i => i.asset_code).filter(Boolean))).join(", ");
+          const names = items.map(i => i.asset_name).filter(Boolean).join(", ");
+          const categories = Array.from(new Set(items.map(i => i.category).filter(Boolean))).join(", ");
+          const brands = Array.from(new Set(items.map(i => i.brand_model).filter(Boolean))).join(", ");
+          const depts = Array.from(new Set(items.map(i => i.department).filter(Boolean))).join(", ");
+          const locs = Array.from(new Set(items.map(i => i.location).filter(Boolean))).join(", ");
+
+          const allFound = items.every(i => i.inspection_result === "พบ");
+          const allNotFound = items.every(i => i.inspection_result === "ไม่พบ");
+          const resultSummary = allFound ? "พบ" : (allNotFound ? "ไม่พบ" : "พบบางส่วน");
+
+          const conditions = Array.from(new Set(items.map(i => i.condition).filter(Boolean)));
+          const conditionSummary = conditions.length === 1 ? conditions[0] : conditions.join(" / ");
+
+          const dates = items.map(i => i.inspection_date).filter(Boolean).sort();
+          const latestDate = dates.length > 0 ? dates[dates.length - 1] : "";
+
+          result.push({
+            __backendId: "group_" + encodeURIComponent(key),
+            isGroup: true,
+            responsible_person: key,
+            inspector: items[0].inspector || key,
+            asset_code: codes || "—",
+            asset_name: `${names} (${items.length} รายการ)`,
+            category: categories || "ไม่ระบุหมวด",
+            brand_model: brands || "ไม่ระบุยี่ห้อ/รุ่น",
+            department: depts || "—",
+            location: locs || "—",
+            inspection_result: resultSummary,
+            condition: conditionSummary,
+            good_qty: totalGood,
+            damaged_qty: totalDamaged,
+            actual_qty: totalActual,
+            inspection_date: latestDate,
+            items: items
+          });
+        }
+      });
+
+      return result;
+    }
+
+    function createRow(record) {
+      const fragment = rowTemplate.content.cloneNode(true);
+      const row = fragment.querySelector("tr");
+      row.dataset.rowId = record.__backendId;
+
+      row.querySelector(".row-code").textContent = record.asset_code || "—";
+      row.querySelector(".row-category").textContent = record.category || "ไม่ระบุหมวด";
+      
+      const nameEl = row.querySelector(".row-name");
+      nameEl.textContent = record.asset_name || "—";
+      if (record.isGroup) {
+        const badgeSpan = document.createElement("span");
+        badgeSpan.className = "ml-1.5 text-[10px] bg-teal-100 text-teal-800 font-extrabold px-2 py-0.5 rounded-full inline-block";
+        badgeSpan.textContent = `กลุ่ม (${record.items.length})`;
+        nameEl.appendChild(badgeSpan);
+      }
+
+      row.querySelector(".row-brand").textContent = record.brand_model || "ไม่ระบุยี่ห้อ/รุ่น";
+      row.querySelector(".row-department").textContent = record.department || "—";
+      row.querySelector(".row-location").textContent = record.location || "—";
+
+      const resultEl = row.querySelector(".row-result");
+      resultEl.textContent = record.inspection_result || "—";
+      resultEl.classList.add(record.inspection_result === "พบ" ? "badge-found" : "badge-missing");
+
+      const conditionEl = row.querySelector(".row-condition");
+      conditionEl.textContent = "สภาพ: " + (record.condition || "—");
+      conditionEl.classList.add(record.condition === "ปกติ" ? "text-emerald-700" : "text-amber-700");
+
+      row.querySelector(".row-qty").textContent = formatNumber(record.actual_qty);
+      
+      const goodQty = record.good_qty !== undefined ? record.good_qty : Math.max(0, Number(record.actual_qty || 0) - Number(record.damaged_qty || 0));
+      row.querySelector(".row-good-qty").textContent = formatNumber(goodQty);
+      row.querySelector(".row-damaged-qty").textContent = formatNumber(record.damaged_qty);
+
+      row.querySelector(".row-date").textContent = formatDate(record.inspection_date);
+      row.querySelector(".row-inspector").textContent = record.responsible_person || record.inspector || "—";
+
+      row.querySelector(".decrease-good-button").addEventListener("click", () => adjustQuantity(record.__backendId, "good_qty", -1, row));
+      row.querySelector(".increase-good-button").addEventListener("click", () => adjustQuantity(record.__backendId, "good_qty", 1, row));
+      row.querySelector(".decrease-damaged-button").addEventListener("click", () => adjustQuantity(record.__backendId, "damaged_qty", -1, row));
+      row.querySelector(".increase-damaged-button").addEventListener("click", () => adjustQuantity(record.__backendId, "damaged_qty", 1, row));
+
+      attachRowEvents(row, record.__backendId);
+      return row;
+    }
+
+    function updateRow(row, record) {
+      const freshRow = createRow(record);
+      row.replaceWith(freshRow);
+      lucide.createIcons();
+      return freshRow;
+    }
+
+    async function adjustQuantity(backendId, field, delta, row) {
+      const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
+      const record = displayRecords.find((item) => item.__backendId === backendId);
+      if (!record || state.isSaving) return;
+      
+      const targetRecord = record.isGroup ? record.items[0] : record;
+
+      const buttons = field === "good_qty"
+        ? row.querySelectorAll(".decrease-good-button, .increase-good-button")
+        : row.querySelectorAll(".decrease-damaged-button, .increase-damaged-button");
+      
+      const currentVal = field === "good_qty" ? (targetRecord.good_qty !== undefined ? targetRecord.good_qty : Math.max(0, targetRecord.actual_qty - targetRecord.damaged_qty)) : (targetRecord.damaged_qty || 0);
+      const nextQty = Math.max(0, Number(currentVal) + delta);
+
+      buttons.forEach((button) => { button.disabled = true; });
+      
+      let updatedData = { ...targetRecord };
+      updatedData[field] = nextQty;
+      
+      const updatedGood = field === "good_qty" ? nextQty : (targetRecord.good_qty !== undefined ? targetRecord.good_qty : Math.max(0, targetRecord.actual_qty - targetRecord.damaged_qty));
+      const updatedDamaged = field === "damaged_qty" ? nextQty : (targetRecord.damaged_qty || 0);
+      updatedData.actual_qty = updatedGood + updatedDamaged;
+
+      const result = await window.dataSdk.update(updatedData);
+      if (!result.isOk) {
+        setStatus(listStatus, "ไม่สามารถปรับจำนวนได้ กรุณาลองอีกครั้ง", "error");
+        buttons.forEach((button) => { button.disabled = false; });
+      }
+    }
+
+    // ฟังก์ชันช่วยโหลดข้อมูลใส่แบบฟอร์มเพื่อเตรียมแก้ไข
+    function populateFormForEdit(record) {
+      inputs.department.value = record.department || "";
+      inputs.assetCode.value = record.asset_code || "";
+      inputs.assetName.value = record.asset_name || "";
+      inputs.category.value = record.category || "";
+      inputs.brandModel.value = record.brand_model || "";
+      inputs.location.value = record.location || "";
+      inputs.condition.value = record.condition || "";
+      inputs.inspectionResult.value = record.inspection_result || "";
+      
+      const dmg = record.damaged_qty ?? 0;
+      const act = record.actual_qty ?? 0;
+      const good = record.good_qty !== undefined ? record.good_qty : Math.max(0, act - dmg);
+      
+      inputs.goodQty.value = good;
+      inputs.damagedQty.value = dmg;
+      inputs.totalQty.value = good + dmg;
+      
+      inputs.responsiblePerson.value = record.responsible_person || "";
+      inputs.inspector.value = record.inspector || "";
+      inputs.inspectionDate.value = toDateInputValue(record.inspection_date);
+      inputs.acquisitionDate.value = toDateInputValue(record.acquisition_date);
+      inputs.relatedRemarks.value = record.related_remarks || "";
+      inputs.remarks.value = record.remarks || "";
+      
+      state.editingId = record.__backendId;
+      
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      setStatus(formStatus, "โหลดข้อมูลสำหรับแก้ไขแล้ว กรุณาบันทึกเพื่อยืนยันการเปลี่ยนแปลง", "neutral");
+      
+      saveButton.classList.replace("bg-teal-800", "bg-amber-600");
+      saveButton.classList.replace("shadow-teal-800/20", "shadow-amber-600/20");
+      saveButtonText.textContent = "อัปเดตข้อมูล";
+    }
+
+    window.editSingleRecord = function(backendId) {
+      viewModal.classList.add("hidden");
+      const record = state.records.find(r => r.__backendId === backendId);
+      if (record) populateFormForEdit(record);
+    };
+
+    // ฟังก์ชันเปิด Modal พร้อมจัดการข้อมูลประวัติ และรายการย่อยในกลุ่ม
+    function openViewModal(record) {
+      document.getElementById("v-code").textContent = record.asset_code || "-";
+      document.getElementById("v-name").textContent = record.asset_name || "-";
+      document.getElementById("v-dept").textContent = record.department || "-";
+      document.getElementById("v-cat").textContent = record.category || "-";
+      document.getElementById("v-brand").textContent = record.brand_model || "-";
+      document.getElementById("v-loc").textContent = record.location || "-";
+      
+      document.getElementById("v-condition").textContent = record.condition || "-";
+      document.getElementById("v-result").textContent = record.inspection_result || "-";
+      
+      const dmg = record.damaged_qty ?? 0;
+      const act = record.actual_qty ?? 0;
+      const good = record.good_qty !== undefined ? record.good_qty : Math.max(0, act - dmg);
+      
+      document.getElementById("v-good").textContent = formatNumber(good);
+      document.getElementById("v-damaged").textContent = formatNumber(dmg);
+      document.getElementById("v-total").textContent = formatNumber(act);
+      document.getElementById("v-remarks").textContent = record.remarks || "ไม่มีหมายเหตุ";
+      
+      document.getElementById("v-inspector").textContent = record.inspector || "-";
+      document.getElementById("v-responsible").textContent = record.responsible_person || "-";
+      document.getElementById("v-date").textContent = formatDate(record.inspection_date);
+      document.getElementById("v-acq-date").textContent = formatDate(record.acquisition_date);
+      document.getElementById("v-rel-remarks").textContent = record.related_remarks || "ไม่มีบันทึกเพิ่มเติม";
+
+      // แสดงรายการย่อยหากเป็นข้อมูลที่ถูกจัดกลุ่ม
+      const groupContainer = document.getElementById("v-group-items-container");
+      const groupCount = document.getElementById("v-group-count");
+      const groupList = document.getElementById("v-group-items-list");
+
+      if (record.isGroup && record.items) {
+        groupContainer.classList.remove("hidden");
+        groupCount.textContent = `${record.items.length} รายการ`;
+        groupList.innerHTML = record.items.map((item, idx) => `
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-teal-900">${idx + 1}. ${item.asset_name || "ไม่ระบุชื่อ"}</span>
+                <span class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono">${item.asset_code || "ไม่มีรหัส"}</span>
+              </div>
+              <p class="text-xs text-slate-500">หมวด: ${item.category || "-"} | ยี่ห้อ: ${item.brand_model || "-"} | สถานที่: ${item.location || "-"}</p>
+              <p class="text-xs text-slate-600">สภาพ: <strong>${item.condition || "-"}</strong> | ผลตรวจ: <strong>${item.inspection_result || "-"}</strong> | ปกติ: <strong class="text-emerald-700">${item.good_qty ?? 0}</strong>, ชำรุด: <strong class="text-red-700">${item.damaged_qty ?? 0}</strong> (รวม ${item.actual_qty ?? 0})</p>
+            </div>
+            <button type="button" onclick="editSingleRecord('${item.__backendId}')" class="self-start sm:self-center shrink-0 px-3 py-1.5 text-xs font-bold text-teal-700 bg-white border border-teal-300 rounded-lg hover:bg-teal-50">
+              แก้ไขรายการนี้
+            </button>
+          </div>
+        `).join("");
+      } else {
+        groupContainer.classList.add("hidden");
+        groupList.innerHTML = "";
+      }
+
+      // จัดการส่วนแสดงประวัติการแก้ไข (History)
+      historyContainer.classList.add("hidden");
+      historyChevron.classList.remove("rotate-180");
+      
+      if (record.history && record.history.length > 0) {
+        historyBtn.classList.remove("hidden");
+        historyBtn.classList.add("flex");
+        
+        const historyHTML = [...record.history].reverse().map((hist, index) => {
+          const vGood = hist.good_qty !== undefined ? hist.good_qty : Math.max(0, (hist.actual_qty || 0) - (hist.damaged_qty || 0));
+          return `
+            <div class="bg-white border border-slate-200 rounded-xl p-4 text-sm shadow-sm relative overflow-hidden">
+              <div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-300"></div>
+              <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 pb-2 border-b border-slate-100 gap-1 pl-2">
+                <span class="font-bold text-slate-700">เวอร์ชันที่ ${record.history.length - index}</span>
+                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">แก้ไขเมื่อ: ${formatDateTime(hist.__editedAt)}</span>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-2 pl-2">
+                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">สภาพ</span><strong class="text-slate-700">${hist.condition || "-"}</strong></div>
+                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">ผลตรวจ</span><strong class="text-slate-700">${hist.inspection_result || "-"}</strong></div>
+                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">ปกติ / ชำรุด</span><strong class="text-slate-700">${vGood} / ${hist.damaged_qty || 0}</strong></div>
+                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">รวมทั้งหมด</span><strong class="text-teal-800 font-bold">${hist.actual_qty || 0}</strong></div>
+                <div class="col-span-2 md:col-span-4"><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">หมายเหตุ</span><span class="text-slate-600">${hist.remarks || "ไม่มีหมายเหตุ"}</span></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+        
+        historyContainer.innerHTML = historyHTML;
+        
+        historyBtn.onclick = () => {
+          historyContainer.classList.toggle("hidden");
+          historyChevron.classList.toggle("rotate-180");
+        };
+
+      } else {
+        historyBtn.classList.remove("flex");
+        historyBtn.classList.add("hidden");
+        historyContainer.innerHTML = "";
+      }
+
+      viewModal.classList.remove("hidden");
+    }
+
+    closeModalBtn.addEventListener("click", () => { viewModal.classList.add("hidden"); });
+    viewModal.addEventListener("click", (e) => { if(e.target === viewModal) viewModal.classList.add("hidden"); });
+
+    function attachRowEvents(row, backendId) {
+      const viewButton = row.querySelector(".view-button");
+      const editButton = row.querySelector(".edit-button");
+      const deleteButton = row.querySelector(".delete-button");
+      const confirmation = row.querySelector(".confirm-delete");
+      const confirmButton = row.querySelector(".confirm-delete-button");
+      const cancelButton = row.querySelector(".cancel-delete-button");
+
+      viewButton.addEventListener("click", () => {
+        const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
+        const record = displayRecords.find((item) => item.__backendId === backendId);
+        if (record) openViewModal(record);
+      });
+
+      editButton.addEventListener("click", () => {
+        const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
+        const record = displayRecords.find((item) => item.__backendId === backendId);
+        if (!record) return;
+        
+        const targetRecord = record.isGroup ? record.items[0] : record;
+        populateFormForEdit(targetRecord);
+      });
+
+      deleteButton.addEventListener("click", () => {
+        if (state.deletingId && state.deletingId !== backendId) {
+          const activeRow = listElement.querySelector('[data-row-id="' + state.deletingId + '"]');
+          if (activeRow) {
+            activeRow.querySelector(".delete-button").classList.remove("hidden");
+            activeRow.querySelector(".confirm-delete").classList.add("hidden");
+            activeRow.querySelector(".confirm-delete").classList.remove("flex");
+          }
+        }
+        state.deletingId = backendId;
+        deleteButton.classList.add("hidden");
+        confirmation.classList.remove("hidden");
+        confirmation.classList.add("flex");
+      });
+
+      cancelButton.addEventListener("click", () => {
+        state.deletingId = null;
+        deleteButton.classList.remove("hidden");
+        confirmation.classList.add("hidden");
+        confirmation.classList.remove("flex");
+      });
+
+      confirmButton.addEventListener("click", async () => {
+        const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
+        const record = displayRecords.find((item) => item.__backendId === backendId);
+        if (!record) return;
+
+        confirmButton.disabled = true;
+        cancelButton.disabled = true;
+        confirmButton.textContent = "กำลังลบ...";
+        setStatus(listStatus, "กำลังลบรายการ...", "neutral");
+
+        try {
+          let isSuccess = true;
+          if (record.isGroup && record.items) {
+            for (const item of record.items) {
+              const res = await window.dataSdk.delete(item);
+              if (!res.isOk) isSuccess = false;
+            }
+          } else {
+            const res = await window.dataSdk.delete(record);
+            if (!res.isOk) isSuccess = false;
+          }
+
+          if (isSuccess) {
+            setStatus(listStatus, "ลบรายการเรียบร้อยแล้ว", "success");
+          } else {
+            setStatus(listStatus, "ไม่สามารถลบรายการได้ กรุณาลองอีกครั้ง", "error");
+            resetDeleteButtons();
+          }
+        } catch (error) {
+          setStatus(listStatus, "ไม่สามารถเชื่อมต่อเพื่อดำเนินการลบได้", "error");
+          resetDeleteButtons();
+        }
+
+        function resetDeleteButtons() {
+          confirmButton.disabled = false;
+          cancelButton.disabled = false;
+          confirmButton.textContent = "ใช่";
+        }
+      });
+    }
+
+    function renderRecords() {
+      const recordsToShow = groupRecordsByResponsiblePerson(filteredRecords());
+      const existingRows = new Map(
+        Array.from(listElement.querySelectorAll("tr")).map((row) => [row.dataset.rowId, row])
+      );
+
+      recordsToShow.forEach((record) => {
+        const existingRow = existingRows.get(record.__backendId);
+        if (existingRow) {
+          updateRow(existingRow, record);
+          existingRows.delete(record.__backendId);
+        } else {
+          listElement.appendChild(createRow(record));
+        }
+      });
+
+      existingRows.forEach((row) => row.remove());
+
+      const hasRecords = recordsToShow.length > 0;
+      emptyState.classList.toggle("hidden", hasRecords);
+      recordCount.textContent = String(state.records.length);
+
+      if (state.records.length === 0) {
+        setStatus(listStatus, "", "neutral");
+      } else if (recordsToShow.length === 0) {
+        setStatus(listStatus, "ไม่พบรายการที่ตรงกับคำค้นหา", "neutral");
+      } else {
+        setStatus(listStatus, "แสดง " + recordsToShow.length + " กลุ่มรายการ (รวมทั้งหมด " + state.records.length + " รายการ)", "neutral");
+      }
+
+      lucide.createIcons();
+    }
+
+    function resetForm() {
+      state.editingId = null;
+      form.reset();
+      inputs.goodQty.value = "1";
+      inputs.damagedQty.value = "0";
+      inputs.totalQty.value = "1";
+      inputs.inspectionDate.value = toDateInputValue(new Date().toISOString());
+      setStatus(formStatus, "", "neutral");
+      
+      saveButton.classList.replace("bg-amber-600", "bg-teal-800");
+      saveButton.classList.replace("shadow-amber-600/20", "shadow-teal-800/20");
+      saveButtonText.textContent = "บันทึกข้อมูล";
+    }
+
+    clearButton.addEventListener("click", () => {
+      resetForm();
+      setStatus(formStatus, "ล้างข้อมูลในแบบฟอร์มแล้ว", "neutral");
+    });
+
+    searchInput.addEventListener("input", renderRecords);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        setStatus(formStatus, "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน", "error");
+        return;
+      }
+
+      if (state.records.length >= 999 && !state.editingId) {
+        setStatus(formStatus, "มีรายการครบจำนวนสูงสุด 999 รายการแล้ว กรุณาลบรายการเดิมก่อนบันทึกเพิ่ม", "error");
+        return;
+      }
+
+      setSaving(true);
+      setStatus(formStatus, "กำลังบันทึกข้อมูลตรวจนับ...", "neutral");
+
+      const good = Number(inputs.goodQty.value || 0);
+      const damaged = Number(inputs.damagedQty.value || 0);
+
+      const record = {
+        department: inputs.department.value.trim(),
+        asset_code: inputs.assetCode.value.trim(),
+        asset_name: inputs.assetName.value.trim(),
+        category: inputs.category.value.trim(),
+        brand_model: inputs.brandModel.value.trim(),
+        location: inputs.location.value.trim(),
+        condition: inputs.condition.value,
+        inspection_result: inputs.inspectionResult.value,
+        
+        good_qty: good,
+        damaged_qty: damaged,
+        actual_qty: good + damaged,
+        
+        responsible_person: inputs.responsiblePerson.value.trim(),
+        inspector: inputs.inspector.value.trim(),
+        inspection_date: toIsoDate(inputs.inspectionDate.value),
+        acquisition_date: toIsoDate(inputs.acquisitionDate.value),
+        related_remarks: inputs.relatedRemarks.value.trim(),
+        remarks: inputs.remarks.value.trim()
+      };
+
+      try {
+        const editingRecord = state.editingId
+          ? state.records.find((item) => item.__backendId === state.editingId)
+          : null;
+        
+        const result = editingRecord
+          ? await window.dataSdk.update({ ...editingRecord, ...record })
+          : await window.dataSdk.create(record);
+          
+        if (result.isOk) {
+          resetForm();
+          setStatus(formStatus, editingRecord ? "แก้ไขข้อมูลและบันทึกทับรายการเดิมเรียบร้อยแล้ว" : "บันทึกข้อมูลตรวจนับเรียบร้อยแล้ว", "success");
+        } else {
+          setStatus(formStatus, "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง", "error");
+        }
+      } catch (error) {
+        setStatus(formStatus, "ไม่สามารถเชื่อมต่อเพื่อบันทึกข้อมูลได้", "error");
+      } finally {
+        setSaving(false);
+      }
+    });
+
+    const dataHandler = {
+      onDataChanged(data) {
+        state.records = Array.isArray(data)
+          ? [...data].sort((a, b) => new Date(b.inspection_date || 0) - new Date(a.inspection_date || 0))
+          : [];
+        state.deletingId = null;
+        renderRecords();
+      }
+    };
+
+    async function initializeApp() {
+      resetForm();
+      lucide.createIcons();
+      setStatus(listStatus, "กำลังโหลดรายการตรวจนับ...", "neutral");
+
+      try {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          setStatus(listStatus, "ไม่สามารถโหลดข้อมูลรายการตรวจนับได้", "error");
+        }
+      } catch (error) {
+        setStatus(listStatus, "ไม่สามารถเชื่อมต่อเพื่อโหลดข้อมูลได้", "error");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", initializeApp);
+  </script>
+</body>
+</html>
