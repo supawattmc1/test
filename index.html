@@ -156,18 +156,28 @@
             <h1 class="canva-text section-title mt-3 font-bold text-3xl">ระบบแบบฟอร์มตรวจนับครุภัณฑ์</h1>
             <p class="canva-text mt-2 max-w-2xl text-sm leading-6">บันทึกข้อมูลและตรวจสอบสถานะการนับครุภัณฑ์ โดยจัดเก็บแยกเป็นโฟลเดอร์ตามชื่อผู้รับผิดชอบ</p>
           </div>
-          <div class="canva-card rounded-2xl px-5 py-4 min-w-[190px] bg-white border border-teal-900/10 shadow-sm">
-            <p class="canva-text text-xs font-bold uppercase tracking-[0.12em] text-teal-700">จำนวนโฟลเดอร์ / ทั้งหมด</p>
-            <div class="flex items-baseline gap-2 mt-1">
-              <p id="folder-count" class="text-3xl font-extrabold text-teal-800">0</p>
-              <span class="text-xs text-slate-500 font-bold">โฟลเดอร์ (<span id="record-count">0</span> รายการ)</span>
+          <div class="flex flex-col sm:flex-row items-end sm:items-center gap-4">
+            <!-- ปุ่มเปิดประวัติการลบ -->
+            <button id="btn-open-trash" class="canva-button bg-red-50 text-red-700 border border-red-200 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold shadow-sm transition hover:bg-red-100 focus:outline-none">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>ประวัติการลบ</span>
+              <span id="trash-count" class="bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+            </button>
+            <div class="canva-card rounded-2xl px-5 py-4 min-w-[190px] bg-white border border-teal-900/10 shadow-sm">
+              <p class="canva-text text-xs font-bold uppercase tracking-[0.12em] text-teal-700">จำนวนโฟลเดอร์ / ทั้งหมด</p>
+              <div class="flex items-baseline gap-2 mt-1">
+                <p id="folder-count" class="text-3xl font-extrabold text-teal-800">0</p>
+                <span class="text-xs text-slate-500 font-bold">โฟลเดอร์ (<span id="record-count">0</span> รายการ)</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <!-- ส่วนหลักของโปรแกรม (หน้าฟอร์มและตาราง) -->
+    <div id="view-main" class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 block">
+      
       <!-- แบบฟอร์มกรอกข้อมูล -->
       <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden">
         <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -316,7 +326,51 @@
           </div>
         </div>
       </section>
-    </main>
+    </div>
+
+    <!-- ส่วนประวัติการลบ (Trash View) ซ่อนไว้ตอนเริ่มต้น -->
+    <div id="view-trash" class="hidden w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden">
+        <div class="px-5 sm:px-8 py-6 border-b border-red-900/10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-red-50/50">
+          <div>
+            <h2 class="canva-text section-title font-bold text-xl text-red-900 flex items-center gap-2">
+              <i data-lucide="trash-2" class="w-6 h-6"></i> ประวัติการลบ (ถังขยะ)
+            </h2>
+            <p class="canva-text mt-1 text-sm text-red-700">รายการที่ถูกลบจะอยู่ที่นี่ คุณสามารถกู้คืนหรือลบถาวรได้</p>
+          </div>
+          <button id="btn-back-main" class="canva-button bg-white border border-slate-300 text-slate-700 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition hover:bg-slate-50 focus:outline-none">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> กลับหน้าหลัก
+          </button>
+        </div>
+        
+        <div class="table-scroll">
+          <div class="overflow-x-auto px-5 sm:px-8 pb-7 pt-4">
+            <table class="w-full min-w-[1080px] text-left border-separate border-spacing-y-2">
+              <thead>
+                <tr class="text-xs uppercase tracking-[0.08em] text-slate-600 bg-slate-100">
+                  <th class="px-4 py-3 font-bold rounded-l-xl">ชื่อครุภัณฑ์ / รหัส</th>
+                  <th class="px-4 py-3 font-bold">ผู้รับผิดชอบ</th>
+                  <th class="px-4 py-3 font-bold">หมวดหมู่ / แผนก</th>
+                  <th class="px-4 py-3 font-bold">จำนวน / สภาพ</th>
+                  <th class="px-4 py-3 font-bold">วันที่ลบ</th>
+                  <th class="px-4 py-3 font-bold rounded-r-xl">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="trash-list"></tbody>
+            </table>
+            
+            <div id="trash-empty-state" class="canva-banner rounded-2xl text-center py-12 px-6 mt-5 border border-dashed border-slate-300">
+              <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+                <i data-lucide="inbox" class="w-6 h-6"></i>
+              </div>
+              <h3 class="canva-text mt-4 font-bold text-lg text-slate-700">ไม่มีประวัติการลบ</h3>
+              <p class="canva-text mt-1 text-sm text-slate-500">ถังขยะว่างเปล่าในขณะนี้</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
   </div>
 
   <!-- Modal สำหรับดูรายละเอียด (Modal View) -->
@@ -465,6 +519,7 @@
 
     const state = { 
       records: [], 
+      deletedRecords: [], // เพิ่มเก็บประวัติการลบ
       isSaving: false, 
       editingId: null,
       expandedFolders: new Set()
@@ -482,6 +537,14 @@
     const recordCount = document.getElementById("record-count");
     const folderCount = document.getElementById("folder-count");
     const searchInput = document.getElementById("search-input");
+    
+    const viewMain = document.getElementById("view-main");
+    const viewTrash = document.getElementById("view-trash");
+    const btnOpenTrash = document.getElementById("btn-open-trash");
+    const btnBackMain = document.getElementById("btn-back-main");
+    const trashListElement = document.getElementById("trash-list");
+    const trashEmptyState = document.getElementById("trash-empty-state");
+    const trashCount = document.getElementById("trash-count");
     
     const viewModal = document.getElementById("view-modal");
     const closeModalBtn = document.getElementById("close-modal-btn");
@@ -506,6 +569,16 @@
       remarks: document.getElementById("remarks")
     };
 
+    // Navigation (สลับหน้าหลัก กับ หน้าประวัติการลบ)
+    btnOpenTrash.addEventListener("click", () => {
+      viewMain.classList.add("hidden");
+      viewTrash.classList.remove("hidden");
+    });
+    btnBackMain.addEventListener("click", () => {
+      viewTrash.classList.add("hidden");
+      viewMain.classList.remove("hidden");
+    });
+
     function calculateTotalQty() {
       const good = parseInt(inputs.goodQty.value) || 0;
       const damaged = parseInt(inputs.damagedQty.value) || 0;
@@ -526,11 +599,16 @@
       return new Intl.NumberFormat("th-TH", { maximumFractionDigits: 2 }).format(Number(value || 0));
     }
 
-    function formatDate(isoValue) {
+    function formatDate(isoValue, includeTime = true) {
       if (!isoValue) return "—";
       const date = new Date(isoValue);
       if (Number.isNaN(date.getTime())) return "—";
-      return new Intl.DateTimeFormat("th-TH", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+      const options = { day: "2-digit", month: "short", year: "numeric" };
+      if (includeTime) {
+        options.hour = '2-digit';
+        options.minute = '2-digit';
+      }
+      return new Intl.DateTimeFormat("th-TH", options).format(date);
     }
 
     function toIsoDate(value) {
@@ -658,7 +736,7 @@
           <td class="px-4 py-3.5 font-bold text-emerald-700">${formatNumber(folder.totalGood)}</td>
           <td class="px-4 py-3.5 font-bold text-red-700">${formatNumber(folder.totalDamaged)}</td>
           <td class="px-4 py-3.5 text-xs text-slate-600">
-            <div>${formatDate(folder.latestDate)}</div>
+            <div>${formatDate(folder.latestDate, false)}</div>
             <div class="text-[11px] text-slate-400">ตรวจโดย: ${folder.inspector}</div>
           </td>
           <td class="px-4 py-3.5 rounded-r-xl">
@@ -732,13 +810,13 @@
                   </div>
                 </div>
               </td>
-              <td class="px-4 py-3 text-xs text-slate-500">${formatDate(item.inspection_date)}</td>
+              <td class="px-4 py-3 text-xs text-slate-500">${formatDate(item.inspection_date, false)}</td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-1">
                   <button type="button" class="btn-edit-item p-1.5 rounded-lg text-teal-700 bg-teal-50 hover:bg-teal-100" title="แก้ไขรายการนี้">
                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                   </button>
-                  <button type="button" class="btn-del-item p-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100" title="ลบรายการนี้">
+                  <button type="button" class="btn-del-item p-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100" title="ย้ายไปถังขยะ">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
@@ -751,11 +829,13 @@
             childTr.querySelector(".btn-inc-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", 1));
             childTr.querySelector(".btn-edit-item").addEventListener("click", () => populateFormForEdit(item));
 
+            // Soft Delete Action
             childTr.querySelector(".btn-del-item").addEventListener("click", async () => {
-              if (confirm(`ยืนยันการลบรายการ "${item.asset_name}" หรือไม่?`)) {
-                setStatus(listStatus, "กำลังลบรายการ...", "neutral");
-                const res = await window.dataSdk.delete(item);
-                if (res.isOk) setStatus(listStatus, "ลบรายการสำเร็จแล้ว", "success");
+              if (confirm(`ยืนยันการย้ายรายการ "${item.asset_name}" ไปที่ประวัติการลบหรือไม่? (สามารถกู้คืนได้)`)) {
+                setStatus(listStatus, "กำลังย้ายไปถังขยะ...", "neutral");
+                const deletedItem = { ...item, is_deleted: true, deleted_at: new Date().toISOString() };
+                const res = await window.dataSdk.update(deletedItem);
+                if (res.isOk) setStatus(listStatus, "ย้ายรายการไปที่ถังขยะสำเร็จแล้ว", "success");
               }
             });
 
@@ -766,6 +846,69 @@
 
       lucide.createIcons();
     }
+
+    function renderTrash() {
+      trashListElement.innerHTML = "";
+      trashCount.textContent = String(state.deletedRecords.length);
+
+      if (state.deletedRecords.length === 0) {
+        trashEmptyState.classList.remove("hidden");
+        return;
+      }
+      trashEmptyState.classList.add("hidden");
+
+      state.deletedRecords.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.className = "child-row border-b border-slate-200 text-sm";
+        tr.innerHTML = `
+          <td class="px-4 py-3 border-l-4 border-red-400">
+            <div class="font-bold text-slate-800">${item.asset_name || '—'}</div>
+            <div class="text-xs text-slate-500 mt-1">รหัส: <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded">${item.asset_code || '—'}</span></div>
+          </td>
+          <td class="px-4 py-3 font-semibold text-slate-700">${item.responsible_person || '—'}</td>
+          <td class="px-4 py-3 text-xs text-slate-600">
+            <div>${item.category || '—'}</div>
+            <div class="text-slate-400 mt-1">แผนก: ${item.department || '-'}</div>
+          </td>
+          <td class="px-4 py-3 text-xs text-slate-600">
+            <div>รวม: <strong>${item.actual_qty || 0}</strong></div>
+            <div class="text-slate-400 mt-1">สภาพ: ${item.condition || '-'}</div>
+          </td>
+          <td class="px-4 py-3 text-xs text-red-600 font-semibold">${formatDate(item.deleted_at)}</td>
+          <td class="px-4 py-3 rounded-r-xl">
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="restoreItem('${item.__backendId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block mr-1"></i> กู้คืน
+              </button>
+              <button type="button" onclick="hardDeleteItem('${item.__backendId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition" title="ลบถาวร (กู้ไม่ได้)">
+                <i data-lucide="trash" class="w-3.5 h-3.5 inline-block"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        trashListElement.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    window.restoreItem = async function(backendId) {
+      const item = state.deletedRecords.find(r => r.__backendId === backendId);
+      if (item) {
+        if (confirm(`คุณต้องการกู้คืนรายการ "${item.asset_name}" ให้กลับไปใช้งานตามปกติหรือไม่?`)) {
+          const restoredItem = { ...item, is_deleted: false, deleted_at: null };
+          await window.dataSdk.update(restoredItem);
+        }
+      }
+    };
+
+    window.hardDeleteItem = async function(backendId) {
+      const item = state.deletedRecords.find(r => r.__backendId === backendId);
+      if (item) {
+        if (confirm(`คำเตือน: คุณต้องการลบรายการ "${item.asset_name}" ถาวรหรือไม่? การกระทำนี้ไม่สามารถกู้คืนได้`)) {
+          await window.dataSdk.delete(item);
+        }
+      }
+    };
 
     async function updateItemQty(item, field, delta) {
       if (state.isSaving) return;
@@ -917,7 +1060,10 @@
         inspection_date: toIsoDate(inputs.inspectionDate.value),
         acquisition_date: toIsoDate(inputs.acquisitionDate.value),
         relatedRemarks: inputs.relatedRemarks.value.trim(),
-        remarks: inputs.remarks.value.trim()
+        remarks: inputs.remarks.value.trim(),
+        
+        is_deleted: false,
+        deleted_at: null
       };
 
       try {
@@ -945,10 +1091,17 @@
 
     const dataHandler = {
       onDataChanged(data) {
-        state.records = Array.isArray(data)
-          ? [...data].sort((a, b) => new Date(b.inspection_date || 0) - new Date(a.inspection_date || 0))
-          : [];
+        if (!Array.isArray(data)) data = [];
+        
+        // แยกข้อมูลที่ถูกลบ (Soft Deleted) และข้อมูลปกติ
+        const active = data.filter(r => r.is_deleted !== true && r.is_deleted !== 'true');
+        const deleted = data.filter(r => r.is_deleted === true || r.is_deleted === 'true');
+
+        state.records = active.sort((a, b) => new Date(b.inspection_date || 0) - new Date(a.inspection_date || 0));
+        state.deletedRecords = deleted.sort((a, b) => new Date(b.deleted_at || 0) - new Date(a.deleted_at || 0));
+        
         renderFolders();
+        renderTrash();
       }
     };
 
