@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แบบฟอร์มตรวจนับครุภัณฑ์</title>
+  <title>ระบบแบบฟอร์มตรวจนับครุภัณฑ์ (Folder View)</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -104,18 +104,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .result-row {
-      transition: background .18s ease;
-    }
-
-    .result-row:hover { background: #f2faf7; }
-
-    .action-icon {
-      width: 1rem;
-      height: 1rem;
-      pointer-events: none;
-    }
-
     .badge {
       display: inline-flex;
       align-items: center;
@@ -128,20 +116,28 @@
 
     .badge-found { background: #d9f5e9; color: #087443; }
     .badge-missing { background: #fde7e5; color: #b42318; }
-    .badge-normal { background: #e5f2ee; color: #216052; }
-    .badge-warning { background: #fff2d5; color: #8a5a0a; }
-    .badge-diff { background: #edf0ef; color: #425a53; }
 
-    /* Custom Scrollbar for Modal */
+    .folder-row {
+      background-color: #f0f7f5;
+      transition: background-color 0.2s ease;
+    }
+    .folder-row:hover {
+      background-color: #e2f0ed;
+    }
+
+    .child-row {
+      background-color: #ffffff;
+      transition: background-color 0.15s ease;
+    }
+    .child-row:hover {
+      background-color: #f9fbfb;
+    }
+
+    /* Custom Scrollbar */
     .custom-scrollbar::-webkit-scrollbar { width: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #c8d8d3; border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a3b8b1; }
-
-    @media (max-width: 640px) {
-      .table-scroll { margin-left: -1rem; margin-right: -1rem; }
-      .table-scroll > div { padding-left: 1rem; padding-right: 1rem; }
-    }
   </style>
 </head>
 
@@ -153,31 +149,35 @@
           <div>
             <div class="flex items-center gap-3 text-teal-800">
               <div class="w-10 h-10 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-md">
-                <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                <i data-lucide="folder-check" class="w-5 h-5"></i>
               </div>
               <p class="canva-text text-xs font-bold tracking-[0.18em] uppercase">ระบบจัดการคลัง</p>
             </div>
-            <h1 class="canva-text section-title mt-3 font-bold text-3xl">ระบบแบบฟอร์มตรวจนับครุภัณฑ์</h1>
-            <p class="canva-text mt-2 max-w-2xl text-sm leading-6">บันทึกข้อมูลและตรวจสอบสถานะการนับครุภัณฑ์ประจำปี เพื่อสรุปยอดและจัดการทรัพย์สิน</p>
+            <h1 class="canva-text section-title mt-3 font-bold text-3xl">ระบบแบบฟอร์มตรวจนับครุภัณฑ์ (แยกโฟลเดอร์บุคคล)</h1>
+            <p class="canva-text mt-2 max-w-2xl text-sm leading-6">บันทึกข้อมูลและตรวจสอบสถานะการนับครุภัณฑ์ โดยจัดเก็บแยกเป็นโฟลเดอร์ตามชื่อผู้รับผิดชอบ</p>
           </div>
           <div class="canva-card rounded-2xl px-5 py-4 min-w-[190px] bg-white border border-teal-900/10 shadow-sm">
-            <p class="canva-text text-xs font-bold uppercase tracking-[0.12em] text-teal-700">จำนวนที่บันทึกแล้ว</p>
-            <p id="record-count" class="mt-1 text-3xl font-extrabold text-teal-800" aria-live="polite">0</p>
+            <p class="canva-text text-xs font-bold uppercase tracking-[0.12em] text-teal-700">จำนวนโฟลเดอร์ / ทั้งหมด</p>
+            <div class="flex items-baseline gap-2 mt-1">
+              <p id="folder-count" class="text-3xl font-extrabold text-teal-800">0</p>
+              <span class="text-xs text-slate-500 font-bold">โฟลเดอร์ (<span id="record-count">0</span> รายการ)</span>
+            </div>
           </div>
         </div>
       </div>
     </header>
 
     <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <!-- แบบฟอร์มกรอกข้อมูล -->
       <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden">
         <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="canva-text section-title font-bold text-xl">บันทึกข้อมูลครุภัณฑ์</h2>
-            <p class="canva-text mt-1 text-sm text-gray-600">กรอกแบบฟอร์มด้านล่างเพื่อเพิ่มข้อมูลใหม่หรืออัปเดตข้อมูล</p>
+            <p class="canva-text mt-1 text-sm text-gray-600">กรอกแบบฟอร์มด้านล่าง ระบบจะจัดเก็บเข้าโฟลเดอร์ผู้รับผิดชอบให้อัตโนมัติ</p>
           </div>
           <div class="flex items-center gap-2 text-xs font-semibold text-teal-800 bg-teal-50 px-3 py-2 rounded-full">
             <i data-lucide="shield-check" class="w-4 h-4"></i> 
-            <span class="canva-text">ข้อมูลถูกจัดการในระบบอย่างปลอดภัย</span>
+            <span class="canva-text">ข้อมูลซิงค์ตรงกับ Google Sheets</span>
           </div>
         </div>
         
@@ -216,7 +216,6 @@
                 </select>
               </div>
               
-              <!-- ช่องใส่ตัวเลข (จำนวนปกติ, ชำรุด, รวมทั้งหมด) -->
               <div><label class="canva-text field-label" for="good-qty">จำนวนปกติ</label> <input id="good-qty" class="field-control" type="number" min="0" step="1" value="1" required></div>
               <div><label class="canva-text field-label" for="damaged-qty">จำนวนที่ชำรุด</label> <input id="damaged-qty" class="field-control" type="number" min="0" step="1" value="0" required></div>
               <div>
@@ -229,9 +228,9 @@
           </section>
 
           <section class="mt-8 pt-7 border-t border-dashed border-teal-900/20" aria-labelledby="people-info-heading">
-            <h3 id="people-info-heading" class="canva-text section-title font-bold border-l-4 border-teal-700 pl-3">ข้อมูลบุคคลและวันที่</h3>
+            <h3 id="people-info-heading" class="canva-text section-title font-bold border-l-4 border-teal-700 pl-3">ข้อมูลผู้รับผิดชอบและวันที่</h3>
             <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-              <div><label class="canva-text field-label" for="responsible-person">ผู้รับผิดชอบ</label> <input id="responsible-person" class="field-control" type="text"></div>
+              <div><label class="canva-text field-label" for="responsible-person">ผู้รับผิดชอบ (ชื่อโฟลเดอร์)</label> <input id="responsible-person" class="field-control border-teal-500 font-semibold text-teal-900" type="text" placeholder="ระบุชื่อผู้รับผิดชอบ..." required></div>
               <div><label class="canva-text field-label" for="inspector">ผู้ตรวจนับ</label> <input id="inspector" class="field-control" type="text" required></div>
               <div><label class="canva-text field-label" for="inspection-date">วันที่ตรวจนับ</label> <input id="inspection-date" class="field-control" type="date" required></div>
               <div><label class="canva-text field-label" for="acquisition-date">วันที่ได้มา (ถ้ามี)</label> <input id="acquisition-date" class="field-control" type="date"></div>
@@ -243,15 +242,15 @@
             <p id="form-status" class="status-message status-neutral" role="status" aria-live="polite"></p>
             <div class="flex flex-wrap gap-3">
               <button id="clear-button" class="canva-button inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold border border-teal-800/20 transition hover:bg-teal-50 focus:outline-none focus:ring-4 focus:ring-teal-200" type="button"> 
-                <i data-lucide="rotate-ccw" class="action-icon"></i> 
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 
                 <span>ล้างข้อมูล</span>
               </button> 
               <button id="save-button" class="canva-button bg-teal-800 text-white inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold shadow-lg shadow-teal-800/20 transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" type="submit"> 
-                <i data-lucide="save" class="action-icon"></i> 
-                <span id="save-button-text" class="canva-text">บันทึกข้อมูล</span> 
+                <i data-lucide="save" class="w-4 h-4"></i> 
+                <span id="save-button-text">บันทึกข้อมูล</span> 
                 <span id="save-loading" class="hidden items-center gap-2"> 
                   <i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i> 
-                  <span class="canva-text">กำลังบันทึก...</span> 
+                  <span>กำลังบันทึก...</span> 
                 </span> 
               </button>
             </div>
@@ -259,16 +258,17 @@
         </form>
       </section>
 
+      <!-- แสดงผลแบบตารางโฟลเดอร์ -->
       <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden mt-8" style="animation-delay: .1s;">
         <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 class="canva-text section-title font-bold text-xl">รายการที่ตรวจนับแล้ว</h2>
-            <p class="canva-text mt-1 text-sm text-gray-600">รายการจะถูกจัดกลุ่มรวมกันอัตโนมัติหากมีผู้รับผิดชอบชื่อเดียวกัน</p>
+            <h2 class="canva-text section-title font-bold text-xl">รายการโฟลเดอร์ผู้รับผิดชอบ</h2>
+            <p class="canva-text mt-1 text-sm text-gray-600">คลิกที่ปุ่ม <strong class="text-teal-800">"เปิดโฟลเดอร์"</strong> เพื่อเปิดขยายดูรายการย่อยภายใน</p>
           </div>
           <div class="relative w-full lg:w-[360px]">
-            <label class="canva-text sr-only" for="search-input">ค้นหา</label> 
+            <label class="sr-only" for="search-input">ค้นหา</label> 
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-700"></i> 
-            <input id="search-input" class="canva-input field-control pl-10" type="search" placeholder="ค้นหา รหัส, ชื่อ, แผนก, ผู้รับผิดชอบ...">
+            <input id="search-input" class="canva-input field-control pl-10" type="search" placeholder="ค้นหา ชื่อผู้รับผิดชอบ, รหัส, ชื่อครุภัณฑ์...">
           </div>
         </div>
         <div class="px-5 sm:px-8 pt-4">
@@ -276,29 +276,29 @@
         </div>
         <div class="table-scroll">
           <div class="overflow-x-auto px-5 sm:px-8 pb-7">
-            <table class="w-full min-w-[1080px] text-left border-separate border-spacing-0">
+            <table class="w-full min-w-[1080px] text-left border-separate border-spacing-y-2">
               <thead>
-                <tr class="text-xs uppercase tracking-[0.08em] text-teal-800 bg-teal-50">
-                  <th class="px-4 py-3 font-bold rounded-tl-xl">รหัสครุภัณฑ์</th>
-                  <th class="px-4 py-3 font-bold">ชื่อครุภัณฑ์</th>
+                <tr class="text-xs uppercase tracking-[0.08em] text-teal-800 bg-teal-50/80">
+                  <th class="px-4 py-3 font-bold rounded-l-xl">ชื่อโฟลเดอร์ (ผู้รับผิดชอบ) / รายการ</th>
                   <th class="px-4 py-3 font-bold">แผนก</th>
                   <th class="px-4 py-3 font-bold">สถานที่ตั้ง</th>
                   <th class="px-4 py-3 font-bold">สถานะ / สภาพ</th>
-                  <th class="px-4 py-3 font-bold">จำนวนรวม</th>
+                  <th class="px-4 py-3 font-bold">รวมทั้งหมด</th>
                   <th class="px-4 py-3 font-bold">จำนวนปกติ</th>
                   <th class="px-4 py-3 font-bold">จำนวนชำรุด</th>
                   <th class="px-4 py-3 font-bold">วันที่ตรวจ / ผู้ตรวจ</th>
-                  <th class="px-4 py-3 font-bold rounded-tr-xl">จัดการ</th>
+                  <th class="px-4 py-3 font-bold rounded-r-xl">จัดการ</th>
                 </tr>
               </thead>
-              <tbody id="asset-list"></tbody>
+              <tbody id="folder-list"></tbody>
             </table>
+            
             <div id="empty-state" class="canva-banner rounded-2xl text-center py-12 px-6 mt-5 border border-dashed border-teal-800/20">
               <div class="mx-auto w-12 h-12 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center">
-                <i data-lucide="inbox" class="w-6 h-6"></i>
+                <i data-lucide="folder-open" class="w-6 h-6"></i>
               </div>
-              <h3 class="canva-text mt-4 font-bold text-lg text-teal-900">ยังไม่มีข้อมูลในระบบ</h3>
-              <p class="canva-text mt-1 text-sm text-teal-700">กรุณากรอกแบบฟอร์มด้านบนเพื่อบันทึกข้อมูลการตรวจนับ</p>
+              <h3 class="canva-text mt-4 font-bold text-lg text-teal-900">ยังไม่มีโฟลเดอร์ในระบบ</h3>
+              <p class="canva-text mt-1 text-sm text-teal-700">กรุณากรอกแบบฟอร์มด้านบนเพื่อสร้างโฟลเดอร์ผู้รับผิดชอบ</p>
             </div>
           </div>
         </div>
@@ -306,12 +306,12 @@
     </main>
   </div>
 
-  <!-- Modal สำหรับดูรายละเอียดและประวัติ (View Details Modal) -->
+  <!-- Modal สำหรับดูรายละเอียด (Modal View) -->
   <div id="view-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar reveal">
       <div class="sticky top-0 z-10 px-6 py-5 border-b border-teal-900/10 flex justify-between items-center bg-teal-50/95 backdrop-blur">
         <h3 class="text-xl font-bold text-teal-900 font-['Eczar'] flex items-center gap-2">
-          <i data-lucide="file-text" class="w-5 h-5"></i> รายละเอียดข้อมูลที่บันทึก
+          <i data-lucide="folder" class="w-5 h-5 text-teal-700"></i> สรุปรายละเอียดโฟลเดอร์
         </h3>
         <button id="close-modal-btn" class="p-2 rounded-full hover:bg-teal-200 text-teal-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -319,115 +319,46 @@
       </div>
       
       <div class="px-6 py-5 space-y-6">
-        <!-- ข้อมูลล่าสุด -->
         <div>
-          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลพื้นฐานครุภัณฑ์</h4>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
-            <div><span class="block text-slate-500 text-xs mb-1">รหัสครุภัณฑ์</span><strong id="v-code" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">ชื่อครุภัณฑ์</span><strong id="v-name" class="text-teal-900"></strong></div>
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลโฟลเดอร์</h4>
+          <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+            <div><span class="block text-slate-500 text-xs mb-1">เจ้าของโฟลเดอร์ / ผู้รับผิดชอบ</span><strong id="v-responsible" class="text-teal-900 text-base"></strong></div>
+            <div><span class="block text-slate-500 text-xs mb-1">จำนวนรายการในโฟลเดอร์</span><strong id="v-count" class="text-teal-800 text-base"></strong></div>
             <div><span class="block text-slate-500 text-xs mb-1">แผนก / หน่วยงาน</span><strong id="v-dept" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">หมวดหมู่</span><strong id="v-cat" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">ยี่ห้อ / รุ่น</span><strong id="v-brand" class="text-teal-900"></strong></div>
             <div><span class="block text-slate-500 text-xs mb-1">สถานที่ตั้ง</span><strong id="v-loc" class="text-teal-900"></strong></div>
           </div>
         </div>
+        
         <div>
-          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลการตรวจนับ</h4>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-sm">
-            <div><span class="block text-slate-500 text-xs mb-1">สภาพ</span><strong id="v-condition" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">ผลตรวจนับ</span><strong id="v-result" class="text-teal-900"></strong></div>
-            <div class="col-span-1 hidden md:block"></div>
-            <div><span class="block text-slate-500 text-xs mb-1">จำนวนปกติ</span><strong id="v-good" class="text-emerald-700"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">จำนวนชำรุด</span><strong id="v-damaged" class="text-red-700"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">รวมทั้งหมด</span><strong id="v-total" class="text-teal-900 text-lg"></strong></div>
-            <div class="col-span-2 md:col-span-3"><span class="block text-slate-500 text-xs mb-1">หมายเหตุ</span><p id="v-remarks" class="text-teal-900 bg-slate-50 p-3 rounded-lg border border-slate-100"></p></div>
-          </div>
-        </div>
-        <div>
-          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">ข้อมูลบุคคลและเวลา</h4>
-          <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-            <div><span class="block text-slate-500 text-xs mb-1">ผู้ตรวจนับ</span><strong id="v-inspector" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">ผู้รับผิดชอบ</span><strong id="v-responsible" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">วันที่ตรวจนับ</span><strong id="v-date" class="text-teal-900"></strong></div>
-            <div><span class="block text-slate-500 text-xs mb-1">วันที่ได้มา</span><strong id="v-acq-date" class="text-teal-900"></strong></div>
-            <div class="col-span-2"><span class="block text-slate-500 text-xs mb-1">บันทึกเพิ่มเติม</span><p id="v-rel-remarks" class="text-teal-900 bg-slate-50 p-3 rounded-lg border border-slate-100"></p></div>
-          </div>
-        </div>
-
-        <!-- ส่วนแสดงรายการย่อยในกลุ่มผู้รับผิดชอบ -->
-        <div id="v-group-items-container" class="hidden mt-6 pt-4 border-t border-dashed border-teal-900/20">
-          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3 flex items-center justify-between">
-            <span>รายการครุภัณฑ์ทั้งหมดในกลุ่มนี้</span>
-            <span id="v-group-count" class="bg-teal-100 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold">0 รายการ</span>
-          </h4>
-          <div id="v-group-items-list" class="space-y-3"></div>
-        </div>
-
-        <!-- ส่วนประวัติการแก้ไข (แสดงเมื่อปุ่มถูกกด) -->
-        <div class="mt-6 pt-4 border-t border-dashed border-teal-900/20">
-          <button id="toggle-history-btn" class="hidden w-full flex items-center justify-between gap-2 text-sm font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 p-3 rounded-xl transition focus:outline-none">
-            <span class="flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> ดูประวัติการแก้ไข</span>
-            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300" id="history-chevron"></i>
-          </button>
-          
-          <div id="history-container" class="hidden mt-4 space-y-4">
-            <!-- ข้อมูลประวัติจะถูกสร้างที่นี่โดย JS -->
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <template id="row-template">
-    <tr class="result-row border-b border-teal-900/10" data-row-id="">
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-code font-bold text-sm text-teal-900"></p><p class="row-category mt-1 text-xs text-slate-500"></p></td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-name font-semibold text-sm"></p><p class="row-brand mt-1 text-xs text-slate-500"></p></td>
-      <td class="row-department px-4 py-4 align-top border-b border-teal-900/10 text-sm"></td>
-      <td class="row-location px-4 py-4 align-top border-b border-teal-900/10 text-sm"></td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><span class="row-result badge"></span> <p class="row-condition mt-2 text-xs"></p></td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-qty text-sm font-semibold text-teal-900 bg-teal-50 px-2 py-1 rounded inline-block"></p></td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-good-qty text-sm font-semibold text-emerald-700"></p>
-        <div class="mt-2 inline-flex items-center gap-1 rounded-lg bg-emerald-50 p-1">
-          <button type="button" class="decrease-good-button inline-flex h-7 w-7 items-center justify-center rounded-md text-emerald-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-300" aria-label="ลดจำนวนที่ดี"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
-          <button type="button" class="increase-good-button inline-flex h-7 w-7 items-center justify-center rounded-md text-emerald-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-300" aria-label="เพิ่มจำนวนที่ดี"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
-        </div>
-      </td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-damaged-qty text-sm font-semibold text-red-700"></p>
-        <div class="mt-2 inline-flex items-center gap-1 rounded-lg bg-red-50 p-1">
-          <button type="button" class="decrease-damaged-button inline-flex h-7 w-7 items-center justify-center rounded-md text-red-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-300" aria-label="ลดจำนวนที่ชำรุด"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
-          <button type="button" class="increase-damaged-button inline-flex h-7 w-7 items-center justify-center rounded-md text-red-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-300" aria-label="เพิ่มจำนวนที่ชำรุด"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
-        </div>
-      </td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10"><p class="row-date text-sm"></p><p class="row-inspector mt-1 text-xs text-slate-500"></p></td>
-      <td class="px-4 py-4 align-top border-b border-teal-900/10">
-        <div class="flex flex-col gap-2">
-          <button type="button" class="view-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-4 focus:ring-blue-100"> 
-            <i data-lucide="eye" class="w-3.5 h-3.5"></i> <span>ดูรายละเอียด</span> 
-          </button>
-          <button type="button" class="edit-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 focus:outline-none focus:ring-4 focus:ring-teal-100"> 
-            <i data-lucide="pencil" class="w-3.5 h-3.5"></i> <span>แก้ไข</span> 
-          </button> 
-          <button type="button" class="delete-button inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-100"> 
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> <span>ลบ</span> 
-          </button>
-          <div class="confirm-delete hidden flex-col items-center gap-2 mt-1">
-            <span class="text-xs text-red-700 font-bold">ลบแน่หรือ?</span>
-            <div class="flex gap-1">
-              <button type="button" class="confirm-delete-button rounded-lg px-2 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-800">ใช่</button> 
-              <button type="button" class="cancel-delete-button rounded-lg px-2 py-1 text-xs font-bold text-teal-800 bg-teal-100 hover:bg-teal-200">ไม่</button>
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">สรุปจำนวนรวม</h4>
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div class="bg-teal-50 p-3 rounded-xl border border-teal-100">
+              <span class="block text-xs font-bold text-teal-700">ปกติทั้งหมด</span>
+              <span id="v-good" class="text-xl font-extrabold text-emerald-700">0</span>
+            </div>
+            <div class="bg-red-50 p-3 rounded-xl border border-red-100">
+              <span class="block text-xs font-bold text-red-700">ชำรุดทั้งหมด</span>
+              <span id="v-damaged" class="text-xl font-extrabold text-red-700">0</span>
+            </div>
+            <div class="bg-slate-100 p-3 rounded-xl border border-slate-200">
+              <span class="block text-xs font-bold text-slate-700">รวมครุภัณฑ์</span>
+              <span id="v-total" class="text-xl font-extrabold text-teal-900">0</span>
             </div>
           </div>
         </div>
-      </td>
-    </tr>
-  </template>
+
+        <div>
+          <h4 class="text-sm font-bold text-teal-700 uppercase tracking-widest border-b pb-2 mb-3">รายการครุภัณฑ์ทั้งหมดในโฟลเดอร์นี้</h4>
+          <div id="v-items-list" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ----------------------------------------------------
     // REAL BACKEND SDK (Google Sheets API)
     // ----------------------------------------------------
-    
     const API_URL = "https://script.google.com/macros/s/AKfycbyIEuHHVRBPpcn3G86muBCz50m6sXoKMvw5ro9zh177Nz8aT6hP_eP6oc0AQaz2BCbR/exec"; 
 
     window.dataSdk = {
@@ -519,7 +450,12 @@
     };
     // ----------------------------------------------------
 
-    const state = { records: [], isSaving: false, deletingId: null, editingId: null };
+    const state = { 
+      records: [], 
+      isSaving: false, 
+      editingId: null,
+      expandedFolders: new Set() // เก็บชื่อโฟลเดอร์ที่ถูกกดเปิด
+    };
 
     const form = document.getElementById("asset-form");
     const saveButton = document.getElementById("save-button");
@@ -528,18 +464,14 @@
     const saveButtonText = document.getElementById("save-button-text");
     const formStatus = document.getElementById("form-status");
     const listStatus = document.getElementById("list-status");
-    const listElement = document.getElementById("asset-list");
+    const folderListElement = document.getElementById("folder-list");
     const emptyState = document.getElementById("empty-state");
     const recordCount = document.getElementById("record-count");
+    const folderCount = document.getElementById("folder-count");
     const searchInput = document.getElementById("search-input");
-    const rowTemplate = document.getElementById("row-template");
     
-    // Modal Elements
     const viewModal = document.getElementById("view-modal");
     const closeModalBtn = document.getElementById("close-modal-btn");
-    const historyBtn = document.getElementById("toggle-history-btn");
-    const historyContainer = document.getElementById("history-container");
-    const historyChevron = document.getElementById("history-chevron");
 
     const inputs = {
       department: document.getElementById("department"),
@@ -587,15 +519,6 @@
       if (Number.isNaN(date.getTime())) return "—";
       return new Intl.DateTimeFormat("th-TH", { day: "2-digit", month: "short", year: "numeric" }).format(date);
     }
-    
-    function formatDateTime(isoValue) {
-      if (!isoValue) return "—";
-      const date = new Date(isoValue);
-      if (Number.isNaN(date.getTime())) return "—";
-      return new Intl.DateTimeFormat("th-TH", { 
-        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" 
-      }).format(date);
-    }
 
     function toIsoDate(value) {
       if (!value) return "";
@@ -637,162 +560,235 @@
     }
 
     // ----------------------------------------------------
-    // ฟังก์ชันจัดกลุ่มข้อมูลตามชื่อผู้รับผิดชอบ / ผู้ตรวจนับ
+    // จัดกลุ่มรายการเป็น "โฟลเดอร์ผู้รับผิดชอบ"
     // ----------------------------------------------------
-    function groupRecordsByResponsiblePerson(records) {
+    function getGroupedFolders() {
+      const records = filteredRecords();
       const map = new Map();
 
-      records.forEach((record, index) => {
-        const keyName = (record.responsible_person || record.inspector || "").trim();
-        const key = keyName !== "" ? keyName : `__unassigned_${record.__backendId || index}`;
-        
-        if (!map.has(key)) {
-          map.set(key, []);
+      records.forEach((record) => {
+        const nameKey = (record.responsible_person || record.inspector || "ไม่ระบุผู้รับผิดชอบ").trim();
+        if (!map.has(nameKey)) {
+          map.set(nameKey, []);
         }
-        map.get(key).push(record);
+        map.get(nameKey).push(record);
       });
 
-      const result = [];
-      map.forEach((items, key) => {
-        if (items.length === 1) {
-          result.push(items[0]);
-        } else {
-          // คำนวณผลรวมจำนวนต่างๆ
-          const totalGood = items.reduce((sum, item) => {
-            const g = item.good_qty !== undefined ? Number(item.good_qty) : Math.max(0, Number(item.actual_qty || 0) - Number(item.damaged_qty || 0));
-            return sum + g;
-          }, 0);
-          
-          const totalDamaged = items.reduce((sum, item) => sum + Number(item.damaged_qty || 0), 0);
-          const totalActual = totalGood + totalDamaged;
+      const folderList = [];
+      map.forEach((items, personName) => {
+        const totalGood = items.reduce((sum, item) => {
+          const g = item.good_qty !== undefined ? Number(item.good_qty) : Math.max(0, Number(item.actual_qty || 0) - Number(item.damaged_qty || 0));
+          return sum + g;
+        }, 0);
+        
+        const totalDamaged = items.reduce((sum, item) => sum + Number(item.damaged_qty || 0), 0);
+        const totalActual = totalGood + totalDamaged;
 
-          const codes = Array.from(new Set(items.map(i => i.asset_code).filter(Boolean))).join(", ");
-          const names = items.map(i => i.asset_name).filter(Boolean).join(", ");
-          const categories = Array.from(new Set(items.map(i => i.category).filter(Boolean))).join(", ");
-          const brands = Array.from(new Set(items.map(i => i.brand_model).filter(Boolean))).join(", ");
-          const depts = Array.from(new Set(items.map(i => i.department).filter(Boolean))).join(", ");
-          const locs = Array.from(new Set(items.map(i => i.location).filter(Boolean))).join(", ");
+        const depts = Array.from(new Set(items.map(i => i.department).filter(Boolean))).join(", ");
+        const locs = Array.from(new Set(items.map(i => i.location).filter(Boolean))).join(", ");
 
-          const allFound = items.every(i => i.inspection_result === "พบ");
-          const allNotFound = items.every(i => i.inspection_result === "ไม่พบ");
-          const resultSummary = allFound ? "พบ" : (allNotFound ? "ไม่พบ" : "พบบางส่วน");
+        const dates = items.map(i => i.inspection_date).filter(Boolean).sort();
+        const latestDate = dates.length > 0 ? dates[dates.length - 1] : "";
+        const inspectors = Array.from(new Set(items.map(i => i.inspector).filter(Boolean))).join(", ");
 
-          const conditions = Array.from(new Set(items.map(i => i.condition).filter(Boolean)));
-          const conditionSummary = conditions.length === 1 ? conditions[0] : conditions.join(" / ");
+        folderList.push({
+          folderName: personName,
+          items: items,
+          totalGood: totalGood,
+          totalDamaged: totalDamaged,
+          totalActual: totalActual,
+          department: depts || "—",
+          location: locs || "—",
+          latestDate: latestDate,
+          inspector: inspectors || personName
+        });
+      });
 
-          const dates = items.map(i => i.inspection_date).filter(Boolean).sort();
-          const latestDate = dates.length > 0 ? dates[dates.length - 1] : "";
+      return folderList;
+    }
 
-          result.push({
-            __backendId: "group_" + encodeURIComponent(key),
-            isGroup: true,
-            responsible_person: key,
-            inspector: items[0].inspector || key,
-            asset_code: codes || "—",
-            asset_name: `${names} (${items.length} รายการ)`,
-            category: categories || "ไม่ระบุหมวด",
-            brand_model: brands || "ไม่ระบุยี่ห้อ/รุ่น",
-            department: depts || "—",
-            location: locs || "—",
-            inspection_result: resultSummary,
-            condition: conditionSummary,
-            good_qty: totalGood,
-            damaged_qty: totalDamaged,
-            actual_qty: totalActual,
-            inspection_date: latestDate,
-            items: items
+    // ----------------------------------------------------
+    // Rendering ตารางแบบ Folder / Accordion
+    // ----------------------------------------------------
+    function renderFolders() {
+      folderListElement.innerHTML = "";
+      const folders = getGroupedFolders();
+
+      if (folders.length === 0) {
+        emptyState.classList.remove("hidden");
+        recordCount.textContent = "0";
+        folderCount.textContent = "0";
+        setStatus(listStatus, "ไม่พบข้อมูลรายการตรวจนับ", "neutral");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      recordCount.textContent = String(state.records.length);
+      folderCount.textContent = String(folders.length);
+
+      folders.forEach((folder) => {
+        const isExpanded = state.expandedFolders.has(folder.folderName);
+        
+        // --- 1. แถวโฟลเดอร์หลัก (Main Folder Row) ---
+        const folderTr = document.createElement("tr");
+        folderTr.className = "folder-row font-medium shadow-sm border border-teal-800/10 rounded-xl";
+
+        folderTr.innerHTML = `
+          <td class="px-4 py-3.5 rounded-l-xl">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="${isExpanded ? 'folder-open' : 'folder'}" class="w-5 h-5 ${isExpanded ? 'text-amber-600' : 'text-teal-700'}"></i>
+              <div>
+                <strong class="text-teal-950 font-bold text-base block">${folder.folderName}</strong>
+                <span class="text-xs bg-teal-800/10 text-teal-800 font-bold px-2 py-0.5 rounded-full inline-block mt-0.5">
+                  ${folder.items.length} รายการ
+                </span>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-3.5 text-sm text-slate-700">${folder.department}</td>
+          <td class="px-4 py-3.5 text-sm text-slate-700">${folder.location}</td>
+          <td class="px-4 py-3.5"><span class="badge badge-found">ปกติ/พร้อมใช้งาน</span></td>
+          <td class="px-4 py-3.5 font-bold text-teal-900 text-base">${formatNumber(folder.totalActual)}</td>
+          <td class="px-4 py-3.5 font-bold text-emerald-700">${formatNumber(folder.totalGood)}</td>
+          <td class="px-4 py-3.5 font-bold text-red-700">${formatNumber(folder.totalDamaged)}</td>
+          <td class="px-4 py-3.5 text-xs text-slate-600">
+            <div>${formatDate(folder.latestDate)}</div>
+            <div class="text-[11px] text-slate-400">ตรวจโดย: ${folder.inspector}</div>
+          </td>
+          <td class="px-4 py-3.5 rounded-r-xl">
+            <div class="flex items-center gap-2">
+              <button type="button" class="toggle-folder-btn px-3 py-1.5 rounded-lg text-xs font-bold text-white ${isExpanded ? 'bg-amber-600 hover:bg-amber-700' : 'bg-teal-800 hover:bg-teal-900'} shadow-sm transition flex items-center gap-1">
+                <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
+                <span>${isExpanded ? 'ย่อโฟลเดอร์' : 'เปิดโฟลเดอร์'}</span>
+              </button>
+              <button type="button" class="view-folder-btn p-1.5 rounded-lg text-teal-800 bg-white border border-teal-200 hover:bg-teal-50" title="ดูรายละเอียดภาพรวม">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        // ปุ่ม Toggle ขยาย/ย่อ โฟลเดอร์
+        folderTr.querySelector(".toggle-folder-btn").addEventListener("click", () => {
+          if (state.expandedFolders.has(folder.folderName)) {
+            state.expandedFolders.delete(folder.folderName);
+          } else {
+            state.expandedFolders.add(folder.folderName);
+          }
+          renderFolders();
+        });
+
+        // ปุ่มดูรายละเอียด Modal
+        folderTr.querySelector(".view-folder-btn").addEventListener("click", () => {
+          openFolderModal(folder);
+        });
+
+        folderListElement.appendChild(folderTr);
+
+        // --- 2. แถวรายการย่อยภายในโฟลเดอร์ (Child Asset Rows) ---
+        if (isExpanded) {
+          folder.items.forEach((item, idx) => {
+            const childTr = document.createElement("tr");
+            childTr.className = "child-row border-b border-teal-900/10 text-sm";
+
+            const goodQty = item.good_qty !== undefined ? item.good_qty : Math.max(0, Number(item.actual_qty || 0) - Number(item.damaged_qty || 0));
+            const damagedQty = Number(item.damaged_qty || 0);
+
+            childTr.innerHTML = `
+              <td class="px-4 py-3 pl-9 border-l-4 border-teal-600">
+                <div class="flex items-start gap-2">
+                  <span class="text-xs text-teal-700 font-bold mt-0.5">↳ ${idx + 1}.</span>
+                  <div>
+                    <div class="font-bold text-teal-900">${item.asset_name || '—'}</div>
+                    <div class="text-xs text-slate-500">รหัส: <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded">${item.asset_code || '—'}</span> | ยี่ห้อ: ${item.brand_model || '—'}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-xs text-slate-600">${item.department || '—'}</td>
+              <td class="px-4 py-3 text-xs text-slate-600">${item.location || '—'}</td>
+              <td class="px-4 py-3">
+                <span class="badge ${item.inspection_result === 'พบ' ? 'badge-found' : 'badge-missing'}">${item.inspection_result || '—'}</span>
+                <div class="text-[11px] text-slate-500 mt-1">สภาพ: ${item.condition || '—'}</div>
+              </td>
+              <td class="px-4 py-3 font-semibold text-teal-900">${formatNumber(item.actual_qty)}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-emerald-700">${goodQty}</span>
+                  <div class="inline-flex gap-0.5 bg-emerald-50 p-0.5 rounded">
+                    <button type="button" class="btn-dec-good p-1 text-emerald-800 hover:bg-white rounded"><i data-lucide="minus" class="w-3 h-3"></i></button>
+                    <button type="button" class="btn-inc-good p-1 text-emerald-800 hover:bg-white rounded"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-red-700">${damagedQty}</span>
+                  <div class="inline-flex gap-0.5 bg-red-50 p-0.5 rounded">
+                    <button type="button" class="btn-dec-dmg p-1 text-red-800 hover:bg-white rounded"><i data-lucide="minus" class="w-3 h-3"></i></button>
+                    <button type="button" class="btn-inc-dmg p-1 text-red-800 hover:bg-white rounded"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-xs text-slate-500">${formatDate(item.inspection_date)}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-1">
+                  <button type="button" class="btn-edit-item p-1.5 rounded-lg text-teal-700 bg-teal-50 hover:bg-teal-100" title="แก้ไขรายการนี้">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" class="btn-del-item p-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100" title="ลบรายการนี้">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </td>
+            `;
+
+            // ปุ่มปรับจำนวน (+/-)
+            childTr.querySelector(".btn-dec-good").addEventListener("click", () => updateItemQty(item, "good_qty", -1));
+            childTr.querySelector(".btn-inc-good").addEventListener("click", () => updateItemQty(item, "good_qty", 1));
+            childTr.querySelector(".btn-dec-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", -1));
+            childTr.querySelector(".btn-inc-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", 1));
+
+            // ปุ่มแก้ไข
+            childTr.querySelector(".btn-edit-item").addEventListener("click", () => populateFormForEdit(item));
+
+            // ปุ่มลบ
+            childTr.querySelector(".btn-del-item").addEventListener("click", async () => {
+              if (confirm(`ยืนยันการลบรายการ "${item.asset_name}" หรือไม่?`)) {
+                setStatus(listStatus, "กำลังลบรายการ...", "neutral");
+                const res = await window.dataSdk.delete(item);
+                if (res.isOk) setStatus(listStatus, "ลบรายการสำเร็จแล้ว", "success");
+              }
+            });
+
+            folderListElement.appendChild(childTr);
           });
         }
       });
 
-      return result;
-    }
-
-    function createRow(record) {
-      const fragment = rowTemplate.content.cloneNode(true);
-      const row = fragment.querySelector("tr");
-      row.dataset.rowId = record.__backendId;
-
-      row.querySelector(".row-code").textContent = record.asset_code || "—";
-      row.querySelector(".row-category").textContent = record.category || "ไม่ระบุหมวด";
-      
-      const nameEl = row.querySelector(".row-name");
-      nameEl.textContent = record.asset_name || "—";
-      if (record.isGroup) {
-        const badgeSpan = document.createElement("span");
-        badgeSpan.className = "ml-1.5 text-[10px] bg-teal-100 text-teal-800 font-extrabold px-2 py-0.5 rounded-full inline-block";
-        badgeSpan.textContent = `กลุ่ม (${record.items.length})`;
-        nameEl.appendChild(badgeSpan);
-      }
-
-      row.querySelector(".row-brand").textContent = record.brand_model || "ไม่ระบุยี่ห้อ/รุ่น";
-      row.querySelector(".row-department").textContent = record.department || "—";
-      row.querySelector(".row-location").textContent = record.location || "—";
-
-      const resultEl = row.querySelector(".row-result");
-      resultEl.textContent = record.inspection_result || "—";
-      resultEl.classList.add(record.inspection_result === "พบ" ? "badge-found" : "badge-missing");
-
-      const conditionEl = row.querySelector(".row-condition");
-      conditionEl.textContent = "สภาพ: " + (record.condition || "—");
-      conditionEl.classList.add(record.condition === "ปกติ" ? "text-emerald-700" : "text-amber-700");
-
-      row.querySelector(".row-qty").textContent = formatNumber(record.actual_qty);
-      
-      const goodQty = record.good_qty !== undefined ? record.good_qty : Math.max(0, Number(record.actual_qty || 0) - Number(record.damaged_qty || 0));
-      row.querySelector(".row-good-qty").textContent = formatNumber(goodQty);
-      row.querySelector(".row-damaged-qty").textContent = formatNumber(record.damaged_qty);
-
-      row.querySelector(".row-date").textContent = formatDate(record.inspection_date);
-      row.querySelector(".row-inspector").textContent = record.responsible_person || record.inspector || "—";
-
-      row.querySelector(".decrease-good-button").addEventListener("click", () => adjustQuantity(record.__backendId, "good_qty", -1, row));
-      row.querySelector(".increase-good-button").addEventListener("click", () => adjustQuantity(record.__backendId, "good_qty", 1, row));
-      row.querySelector(".decrease-damaged-button").addEventListener("click", () => adjustQuantity(record.__backendId, "damaged_qty", -1, row));
-      row.querySelector(".increase-damaged-button").addEventListener("click", () => adjustQuantity(record.__backendId, "damaged_qty", 1, row));
-
-      attachRowEvents(row, record.__backendId);
-      return row;
-    }
-
-    function updateRow(row, record) {
-      const freshRow = createRow(record);
-      row.replaceWith(freshRow);
       lucide.createIcons();
-      return freshRow;
     }
 
-    async function adjustQuantity(backendId, field, delta, row) {
-      const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
-      const record = displayRecords.find((item) => item.__backendId === backendId);
-      if (!record || state.isSaving) return;
-      
-      const targetRecord = record.isGroup ? record.items[0] : record;
+    async function updateItemQty(item, field, delta) {
+      if (state.isSaving) return;
+      const currentGood = item.good_qty !== undefined ? item.good_qty : Math.max(0, Number(item.actual_qty || 0) - Number(item.damaged_qty || 0));
+      const currentDmg = Number(item.damaged_qty || 0);
 
-      const buttons = field === "good_qty"
-        ? row.querySelectorAll(".decrease-good-button, .increase-good-button")
-        : row.querySelectorAll(".decrease-damaged-button, .increase-damaged-button");
-      
-      const currentVal = field === "good_qty" ? (targetRecord.good_qty !== undefined ? targetRecord.good_qty : Math.max(0, targetRecord.actual_qty - targetRecord.damaged_qty)) : (targetRecord.damaged_qty || 0);
-      const nextQty = Math.max(0, Number(currentVal) + delta);
+      let nextGood = currentGood;
+      let nextDmg = currentDmg;
 
-      buttons.forEach((button) => { button.disabled = true; });
-      
-      let updatedData = { ...targetRecord };
-      updatedData[field] = nextQty;
-      
-      const updatedGood = field === "good_qty" ? nextQty : (targetRecord.good_qty !== undefined ? targetRecord.good_qty : Math.max(0, targetRecord.actual_qty - targetRecord.damaged_qty));
-      const updatedDamaged = field === "damaged_qty" ? nextQty : (targetRecord.damaged_qty || 0);
-      updatedData.actual_qty = updatedGood + updatedDamaged;
+      if (field === "good_qty") nextGood = Math.max(0, currentGood + delta);
+      if (field === "damaged_qty") nextDmg = Math.max(0, currentDmg + delta);
 
-      const result = await window.dataSdk.update(updatedData);
-      if (!result.isOk) {
-        setStatus(listStatus, "ไม่สามารถปรับจำนวนได้ กรุณาลองอีกครั้ง", "error");
-        buttons.forEach((button) => { button.disabled = false; });
-      }
+      const updated = {
+        ...item,
+        good_qty: nextGood,
+        damaged_qty: nextDmg,
+        actual_qty: nextGood + nextDmg
+      };
+
+      await window.dataSdk.update(updated);
     }
 
-    // ฟังก์ชันช่วยโหลดข้อมูลใส่แบบฟอร์มเพื่อเตรียมแก้ไข
     function populateFormForEdit(record) {
       inputs.department.value = record.department || "";
       inputs.assetCode.value = record.asset_code || "";
@@ -821,11 +817,41 @@
       state.editingId = record.__backendId;
       
       form.scrollIntoView({ behavior: "smooth", block: "start" });
-      setStatus(formStatus, "โหลดข้อมูลสำหรับแก้ไขแล้ว กรุณาบันทึกเพื่อยืนยันการเปลี่ยนแปลง", "neutral");
+      setStatus(formStatus, "โหลดข้อมูลสำหรับแก้ไขแล้ว กรุณาบันทึกเพื่อยืนยัน", "neutral");
       
       saveButton.classList.replace("bg-teal-800", "bg-amber-600");
       saveButton.classList.replace("shadow-teal-800/20", "shadow-amber-600/20");
       saveButtonText.textContent = "อัปเดตข้อมูล";
+    }
+
+    function openFolderModal(folder) {
+      document.getElementById("v-responsible").textContent = folder.folderName;
+      document.getElementById("v-count").textContent = `${folder.items.length} รายการ`;
+      document.getElementById("v-dept").textContent = folder.department;
+      document.getElementById("v-loc").textContent = folder.location;
+
+      document.getElementById("v-good").textContent = formatNumber(folder.totalGood);
+      document.getElementById("v-damaged").textContent = formatNumber(folder.totalDamaged);
+      document.getElementById("v-total").textContent = formatNumber(folder.totalActual);
+
+      const itemsListEl = document.getElementById("v-items-list");
+      itemsListEl.innerHTML = folder.items.map((item, idx) => `
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-teal-900">${idx + 1}. ${item.asset_name || "ไม่ระบุชื่อ"}</span>
+              <span class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono">${item.asset_code || "ไม่มีรหัส"}</span>
+            </div>
+            <p class="text-xs text-slate-500">หมวด: ${item.category || "-"} | ยี่ห้อ: ${item.brand_model || "-"} | สถานที่: ${item.location || "-"}</p>
+            <p class="text-xs text-slate-600">สภาพ: <strong>${item.condition || "-"}</strong> | ผลตรวจ: <strong>${item.inspection_result || "-"}</strong> | ปกติ: <strong class="text-emerald-700">${item.good_qty ?? 0}</strong>, ชำรุด: <strong class="text-red-700">${item.damaged_qty ?? 0}</strong> (รวม ${item.actual_qty ?? 0})</p>
+          </div>
+          <button type="button" onclick="editSingleRecord('${item.__backendId}')" class="self-start sm:self-center shrink-0 px-3 py-1.5 text-xs font-bold text-teal-700 bg-white border border-teal-300 rounded-lg hover:bg-teal-50">
+            แก้ไขรายการนี้
+          </button>
+        </div>
+      `).join("");
+
+      viewModal.classList.remove("hidden");
     }
 
     window.editSingleRecord = function(backendId) {
@@ -834,226 +860,8 @@
       if (record) populateFormForEdit(record);
     };
 
-    // ฟังก์ชันเปิด Modal พร้อมจัดการข้อมูลประวัติ และรายการย่อยในกลุ่ม
-    function openViewModal(record) {
-      document.getElementById("v-code").textContent = record.asset_code || "-";
-      document.getElementById("v-name").textContent = record.asset_name || "-";
-      document.getElementById("v-dept").textContent = record.department || "-";
-      document.getElementById("v-cat").textContent = record.category || "-";
-      document.getElementById("v-brand").textContent = record.brand_model || "-";
-      document.getElementById("v-loc").textContent = record.location || "-";
-      
-      document.getElementById("v-condition").textContent = record.condition || "-";
-      document.getElementById("v-result").textContent = record.inspection_result || "-";
-      
-      const dmg = record.damaged_qty ?? 0;
-      const act = record.actual_qty ?? 0;
-      const good = record.good_qty !== undefined ? record.good_qty : Math.max(0, act - dmg);
-      
-      document.getElementById("v-good").textContent = formatNumber(good);
-      document.getElementById("v-damaged").textContent = formatNumber(dmg);
-      document.getElementById("v-total").textContent = formatNumber(act);
-      document.getElementById("v-remarks").textContent = record.remarks || "ไม่มีหมายเหตุ";
-      
-      document.getElementById("v-inspector").textContent = record.inspector || "-";
-      document.getElementById("v-responsible").textContent = record.responsible_person || "-";
-      document.getElementById("v-date").textContent = formatDate(record.inspection_date);
-      document.getElementById("v-acq-date").textContent = formatDate(record.acquisition_date);
-      document.getElementById("v-rel-remarks").textContent = record.related_remarks || "ไม่มีบันทึกเพิ่มเติม";
-
-      // แสดงรายการย่อยหากเป็นข้อมูลที่ถูกจัดกลุ่ม
-      const groupContainer = document.getElementById("v-group-items-container");
-      const groupCount = document.getElementById("v-group-count");
-      const groupList = document.getElementById("v-group-items-list");
-
-      if (record.isGroup && record.items) {
-        groupContainer.classList.remove("hidden");
-        groupCount.textContent = `${record.items.length} รายการ`;
-        groupList.innerHTML = record.items.map((item, idx) => `
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-teal-900">${idx + 1}. ${item.asset_name || "ไม่ระบุชื่อ"}</span>
-                <span class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono">${item.asset_code || "ไม่มีรหัส"}</span>
-              </div>
-              <p class="text-xs text-slate-500">หมวด: ${item.category || "-"} | ยี่ห้อ: ${item.brand_model || "-"} | สถานที่: ${item.location || "-"}</p>
-              <p class="text-xs text-slate-600">สภาพ: <strong>${item.condition || "-"}</strong> | ผลตรวจ: <strong>${item.inspection_result || "-"}</strong> | ปกติ: <strong class="text-emerald-700">${item.good_qty ?? 0}</strong>, ชำรุด: <strong class="text-red-700">${item.damaged_qty ?? 0}</strong> (รวม ${item.actual_qty ?? 0})</p>
-            </div>
-            <button type="button" onclick="editSingleRecord('${item.__backendId}')" class="self-start sm:self-center shrink-0 px-3 py-1.5 text-xs font-bold text-teal-700 bg-white border border-teal-300 rounded-lg hover:bg-teal-50">
-              แก้ไขรายการนี้
-            </button>
-          </div>
-        `).join("");
-      } else {
-        groupContainer.classList.add("hidden");
-        groupList.innerHTML = "";
-      }
-
-      // จัดการส่วนแสดงประวัติการแก้ไข (History)
-      historyContainer.classList.add("hidden");
-      historyChevron.classList.remove("rotate-180");
-      
-      if (record.history && record.history.length > 0) {
-        historyBtn.classList.remove("hidden");
-        historyBtn.classList.add("flex");
-        
-        const historyHTML = [...record.history].reverse().map((hist, index) => {
-          const vGood = hist.good_qty !== undefined ? hist.good_qty : Math.max(0, (hist.actual_qty || 0) - (hist.damaged_qty || 0));
-          return `
-            <div class="bg-white border border-slate-200 rounded-xl p-4 text-sm shadow-sm relative overflow-hidden">
-              <div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-300"></div>
-              <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 pb-2 border-b border-slate-100 gap-1 pl-2">
-                <span class="font-bold text-slate-700">เวอร์ชันที่ ${record.history.length - index}</span>
-                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">แก้ไขเมื่อ: ${formatDateTime(hist.__editedAt)}</span>
-              </div>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-2 pl-2">
-                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">สภาพ</span><strong class="text-slate-700">${hist.condition || "-"}</strong></div>
-                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">ผลตรวจ</span><strong class="text-slate-700">${hist.inspection_result || "-"}</strong></div>
-                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">ปกติ / ชำรุด</span><strong class="text-slate-700">${vGood} / ${hist.damaged_qty || 0}</strong></div>
-                <div><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">รวมทั้งหมด</span><strong class="text-teal-800 font-bold">${hist.actual_qty || 0}</strong></div>
-                <div class="col-span-2 md:col-span-4"><span class="block text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">หมายเหตุ</span><span class="text-slate-600">${hist.remarks || "ไม่มีหมายเหตุ"}</span></div>
-              </div>
-            </div>
-          `;
-        }).join("");
-        
-        historyContainer.innerHTML = historyHTML;
-        
-        historyBtn.onclick = () => {
-          historyContainer.classList.toggle("hidden");
-          historyChevron.classList.toggle("rotate-180");
-        };
-
-      } else {
-        historyBtn.classList.remove("flex");
-        historyBtn.classList.add("hidden");
-        historyContainer.innerHTML = "";
-      }
-
-      viewModal.classList.remove("hidden");
-    }
-
-    closeModalBtn.addEventListener("click", () => { viewModal.classList.add("hidden"); });
-    viewModal.addEventListener("click", (e) => { if(e.target === viewModal) viewModal.classList.add("hidden"); });
-
-    function attachRowEvents(row, backendId) {
-      const viewButton = row.querySelector(".view-button");
-      const editButton = row.querySelector(".edit-button");
-      const deleteButton = row.querySelector(".delete-button");
-      const confirmation = row.querySelector(".confirm-delete");
-      const confirmButton = row.querySelector(".confirm-delete-button");
-      const cancelButton = row.querySelector(".cancel-delete-button");
-
-      viewButton.addEventListener("click", () => {
-        const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
-        const record = displayRecords.find((item) => item.__backendId === backendId);
-        if (record) openViewModal(record);
-      });
-
-      editButton.addEventListener("click", () => {
-        const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
-        const record = displayRecords.find((item) => item.__backendId === backendId);
-        if (!record) return;
-        
-        const targetRecord = record.isGroup ? record.items[0] : record;
-        populateFormForEdit(targetRecord);
-      });
-
-      deleteButton.addEventListener("click", () => {
-        if (state.deletingId && state.deletingId !== backendId) {
-          const activeRow = listElement.querySelector('[data-row-id="' + state.deletingId + '"]');
-          if (activeRow) {
-            activeRow.querySelector(".delete-button").classList.remove("hidden");
-            activeRow.querySelector(".confirm-delete").classList.add("hidden");
-            activeRow.querySelector(".confirm-delete").classList.remove("flex");
-          }
-        }
-        state.deletingId = backendId;
-        deleteButton.classList.add("hidden");
-        confirmation.classList.remove("hidden");
-        confirmation.classList.add("flex");
-      });
-
-      cancelButton.addEventListener("click", () => {
-        state.deletingId = null;
-        deleteButton.classList.remove("hidden");
-        confirmation.classList.add("hidden");
-        confirmation.classList.remove("flex");
-      });
-
-      confirmButton.addEventListener("click", async () => {
-        const displayRecords = groupRecordsByResponsiblePerson(filteredRecords());
-        const record = displayRecords.find((item) => item.__backendId === backendId);
-        if (!record) return;
-
-        confirmButton.disabled = true;
-        cancelButton.disabled = true;
-        confirmButton.textContent = "กำลังลบ...";
-        setStatus(listStatus, "กำลังลบรายการ...", "neutral");
-
-        try {
-          let isSuccess = true;
-          if (record.isGroup && record.items) {
-            for (const item of record.items) {
-              const res = await window.dataSdk.delete(item);
-              if (!res.isOk) isSuccess = false;
-            }
-          } else {
-            const res = await window.dataSdk.delete(record);
-            if (!res.isOk) isSuccess = false;
-          }
-
-          if (isSuccess) {
-            setStatus(listStatus, "ลบรายการเรียบร้อยแล้ว", "success");
-          } else {
-            setStatus(listStatus, "ไม่สามารถลบรายการได้ กรุณาลองอีกครั้ง", "error");
-            resetDeleteButtons();
-          }
-        } catch (error) {
-          setStatus(listStatus, "ไม่สามารถเชื่อมต่อเพื่อดำเนินการลบได้", "error");
-          resetDeleteButtons();
-        }
-
-        function resetDeleteButtons() {
-          confirmButton.disabled = false;
-          cancelButton.disabled = false;
-          confirmButton.textContent = "ใช่";
-        }
-      });
-    }
-
-    function renderRecords() {
-      const recordsToShow = groupRecordsByResponsiblePerson(filteredRecords());
-      const existingRows = new Map(
-        Array.from(listElement.querySelectorAll("tr")).map((row) => [row.dataset.rowId, row])
-      );
-
-      recordsToShow.forEach((record) => {
-        const existingRow = existingRows.get(record.__backendId);
-        if (existingRow) {
-          updateRow(existingRow, record);
-          existingRows.delete(record.__backendId);
-        } else {
-          listElement.appendChild(createRow(record));
-        }
-      });
-
-      existingRows.forEach((row) => row.remove());
-
-      const hasRecords = recordsToShow.length > 0;
-      emptyState.classList.toggle("hidden", hasRecords);
-      recordCount.textContent = String(state.records.length);
-
-      if (state.records.length === 0) {
-        setStatus(listStatus, "", "neutral");
-      } else if (recordsToShow.length === 0) {
-        setStatus(listStatus, "ไม่พบรายการที่ตรงกับคำค้นหา", "neutral");
-      } else {
-        setStatus(listStatus, "แสดง " + recordsToShow.length + " กลุ่มรายการ (รวมทั้งหมด " + state.records.length + " รายการ)", "neutral");
-      }
-
-      lucide.createIcons();
-    }
+    closeModalBtn.addEventListener("click", () => viewModal.classList.add("hidden"));
+    viewModal.addEventListener("click", (e) => { if (e.target === viewModal) viewModal.classList.add("hidden"); });
 
     function resetForm() {
       state.editingId = null;
@@ -1071,13 +879,13 @@
 
     clearButton.addEventListener("click", () => {
       resetForm();
-      setStatus(formStatus, "ล้างข้อมูลในแบบฟอร์มแล้ว", "neutral");
+      setStatus(formStatus, "ล้างข้อมูลแบบฟอร์มเรียบร้อย", "neutral");
     });
 
-    searchInput.addEventListener("input", renderRecords);
+    searchInput.addEventListener("input", renderFolders);
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
       if (!form.checkValidity()) {
         form.reportValidity();
@@ -1085,13 +893,8 @@
         return;
       }
 
-      if (state.records.length >= 999 && !state.editingId) {
-        setStatus(formStatus, "มีรายการครบจำนวนสูงสุด 999 รายการแล้ว กรุณาลบรายการเดิมก่อนบันทึกเพิ่ม", "error");
-        return;
-      }
-
       setSaving(true);
-      setStatus(formStatus, "กำลังบันทึกข้อมูลตรวจนับ...", "neutral");
+      setStatus(formStatus, "กำลังบันทึกข้อมูลเข้าโฟลเดอร์...", "neutral");
 
       const good = Number(inputs.goodQty.value || 0);
       const damaged = Number(inputs.damagedQty.value || 0);
@@ -1114,7 +917,7 @@
         inspector: inputs.inspector.value.trim(),
         inspection_date: toIsoDate(inputs.inspectionDate.value),
         acquisition_date: toIsoDate(inputs.acquisitionDate.value),
-        related_remarks: inputs.relatedRemarks.value.trim(),
+        relatedRemarks: inputs.relatedRemarks.value.trim(),
         remarks: inputs.remarks.value.trim()
       };
 
@@ -1128,8 +931,10 @@
           : await window.dataSdk.create(record);
           
         if (result.isOk) {
+          // เปิดขยายโฟลเดอร์คนนี้ให้อัตโนมัติเมื่อบันทึกเสร็จ
+          state.expandedFolders.add(record.responsible_person);
           resetForm();
-          setStatus(formStatus, editingRecord ? "แก้ไขข้อมูลและบันทึกทับรายการเดิมเรียบร้อยแล้ว" : "บันทึกข้อมูลตรวจนับเรียบร้อยแล้ว", "success");
+          setStatus(formStatus, editingRecord ? "อัปเดตข้อมูลเรียบร้อยแล้ว" : "บันทึกข้อมูลเข้าโฟลเดอร์เรียบร้อยแล้ว", "success");
         } else {
           setStatus(formStatus, "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองอีกครั้ง", "error");
         }
@@ -1145,23 +950,22 @@
         state.records = Array.isArray(data)
           ? [...data].sort((a, b) => new Date(b.inspection_date || 0) - new Date(a.inspection_date || 0))
           : [];
-        state.deletingId = null;
-        renderRecords();
+        renderFolders();
       }
     };
 
     async function initializeApp() {
       resetForm();
       lucide.createIcons();
-      setStatus(listStatus, "กำลังโหลดรายการตรวจนับ...", "neutral");
+      setStatus(listStatus, "กำลังโหลดรายการโฟลเดอร์...", "neutral");
 
       try {
         const result = await window.dataSdk.init(dataHandler);
         if (!result.isOk) {
-          setStatus(listStatus, "ไม่สามารถโหลดข้อมูลรายการตรวจนับได้", "error");
+          setStatus(listStatus, "ไม่สามารถโหลดข้อมูลได้", "error");
         }
       } catch (error) {
-        setStatus(listStatus, "ไม่สามารถเชื่อมต่อเพื่อโหลดข้อมูลได้", "error");
+        setStatus(listStatus, "ไม่สามารถเชื่อมต่อระบบได้", "error");
       }
     }
 
