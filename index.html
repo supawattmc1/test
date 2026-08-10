@@ -422,6 +422,25 @@
     </div>
   </div>
 
+  <!-- Modal ยืนยันการทำรายการ (Custom Confirmation Modal) -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 reveal text-center border border-teal-900/10">
+      <div id="confirm-icon-bg" class="mx-auto w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-4">
+        <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+      </div>
+      <h3 id="confirm-title" class="text-xl font-bold text-slate-800 mb-2">ยืนยันการลบข้อมูล</h3>
+      <p id="confirm-message" class="text-sm text-slate-600 mb-6">คุณแน่ใจหรือว่าต้องการย้ายรายการนี้ไปที่ประวัติการลบ?</p>
+      <div class="flex items-center justify-center gap-3">
+        <button id="confirm-cancel-btn" type="button" class="w-1/2 px-4 py-2.5 rounded-xl font-bold border border-slate-300 text-slate-700 hover:bg-slate-50 transition">
+          ยกเลิก
+        </button>
+        <button id="confirm-ok-btn" type="button" class="w-1/2 px-4 py-2.5 rounded-xl font-bold bg-red-600 text-white hover:bg-red-700 shadow-md transition">
+          ยืนยันการลบ
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ----------------------------------------------------
     // REAL BACKEND SDK (Google Sheets API)
@@ -568,6 +587,40 @@
       relatedRemarks: document.getElementById("related-remarks"),
       remarks: document.getElementById("remarks")
     };
+
+    // ฟังก์ชั่นแสดง Modal ยืนยัน (Custom Confirm Dialog)
+    function showConfirmModal({ title, message, confirmText, confirmClass, onConfirm }) {
+      const modal = document.getElementById("confirm-modal");
+      const titleEl = document.getElementById("confirm-title");
+      const msgEl = document.getElementById("confirm-message");
+      const okBtn = document.getElementById("confirm-ok-btn");
+      const cancelBtn = document.getElementById("confirm-cancel-btn");
+
+      titleEl.textContent = title || "ยืนยันการทำรายการ";
+      msgEl.textContent = message || "";
+      okBtn.textContent = confirmText || "ยืนยันการลบ";
+
+      if (confirmClass) {
+        okBtn.className = `w-1/2 px-4 py-2.5 rounded-xl font-bold text-white shadow-md transition ${confirmClass}`;
+      } else {
+        okBtn.className = "w-1/2 px-4 py-2.5 rounded-xl font-bold bg-red-600 text-white hover:bg-red-700 shadow-md transition";
+      }
+
+      modal.classList.remove("hidden");
+      lucide.createIcons();
+
+      const cleanup = () => {
+        modal.classList.add("hidden");
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+
+      cancelBtn.onclick = cleanup;
+      okBtn.onclick = () => {
+        cleanup();
+        if (onConfirm) onConfirm();
+      };
+    }
 
     // Navigation (สลับหน้าหลัก กับ หน้าประวัติการลบ)
     btnOpenTrash.addEventListener("click", () => {
@@ -829,14 +882,20 @@
             childTr.querySelector(".btn-inc-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", 1));
             childTr.querySelector(".btn-edit-item").addEventListener("click", () => populateFormForEdit(item));
 
-            // Soft Delete Action
-            childTr.querySelector(".btn-del-item").addEventListener("click", async () => {
-              if (confirm(`ยืนยันการย้ายรายการ "${item.asset_name}" ไปที่ประวัติการลบหรือไม่? (สามารถกู้คืนได้)`)) {
-                setStatus(listStatus, "กำลังย้ายไปถังขยะ...", "neutral");
-                const deletedItem = { ...item, is_deleted: true, deleted_at: new Date().toISOString() };
-                const res = await window.dataSdk.update(deletedItem);
-                if (res.isOk) setStatus(listStatus, "ย้ายรายการไปที่ถังขยะสำเร็จแล้ว", "success");
-              }
+            // Soft Delete Action ใช้ Custom Confirm Modal
+            childTr.querySelector(".btn-del-item").addEventListener("click", () => {
+              showConfirmModal({
+                title: "ยืนยันการย้ายไปประวัติการลบ",
+                message: `ยืนยันการย้ายรายการ "${item.asset_name}" ไปที่ประวัติการลบหรือไม่? (สามารถกู้คืนได้)`,
+                confirmText: "ยืนยันการลบ",
+                confirmClass: "bg-red-600 hover:bg-red-700",
+                onConfirm: async () => {
+                  setStatus(listStatus, "กำลังย้ายไปถังขยะ...", "neutral");
+                  const deletedItem = { ...item, is_deleted: true, deleted_at: new Date().toISOString() };
+                  const res = await window.dataSdk.update(deletedItem);
+                  if (res.isOk) setStatus(listStatus, "ย้ายรายการไปที่ถังขยะสำเร็จแล้ว", "success");
+                }
+              });
             });
 
             folderListElement.appendChild(childTr);
@@ -891,22 +950,34 @@
       lucide.createIcons();
     }
 
-    window.restoreItem = async function(backendId) {
+    window.restoreItem = function(backendId) {
       const item = state.deletedRecords.find(r => r.__backendId === backendId);
       if (item) {
-        if (confirm(`คุณต้องการกู้คืนรายการ "${item.asset_name}" ให้กลับไปใช้งานตามปกติหรือไม่?`)) {
-          const restoredItem = { ...item, is_deleted: false, deleted_at: null };
-          await window.dataSdk.update(restoredItem);
-        }
+        showConfirmModal({
+          title: "ยืนยันการกู้คืนรายการ",
+          message: `คุณต้องการกู้คืนรายการ "${item.asset_name}" ให้กลับไปใช้งานตามปกติหรือไม่?`,
+          confirmText: "ยืนยันกู้คืน",
+          confirmClass: "bg-teal-700 hover:bg-teal-800",
+          onConfirm: async () => {
+            const restoredItem = { ...item, is_deleted: false, deleted_at: null };
+            await window.dataSdk.update(restoredItem);
+          }
+        });
       }
     };
 
-    window.hardDeleteItem = async function(backendId) {
+    window.hardDeleteItem = function(backendId) {
       const item = state.deletedRecords.find(r => r.__backendId === backendId);
       if (item) {
-        if (confirm(`คำเตือน: คุณต้องการลบรายการ "${item.asset_name}" ถาวรหรือไม่? การกระทำนี้ไม่สามารถกู้คืนได้`)) {
-          await window.dataSdk.delete(item);
-        }
+        showConfirmModal({
+          title: "คำเตือน: ลบรายการถาวร",
+          message: `คุณต้องการลบรายการ "${item.asset_name}" ถาวรหรือไม่? การกระทำนี้ไม่สามารถกู้คืนได้`,
+          confirmText: "ลบถาวร",
+          confirmClass: "bg-red-700 hover:bg-red-800",
+          onConfirm: async () => {
+            await window.dataSdk.delete(item);
+          }
+        });
       }
     };
 
