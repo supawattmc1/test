@@ -157,7 +157,6 @@
             <p class="canva-text mt-2 max-w-2xl text-sm leading-6">บันทึกข้อมูลและตรวจสอบสถานะการนับครุภัณฑ์ โดยจัดเก็บแยกเป็นโฟลเดอร์ตามชื่อผู้รับผิดชอบ</p>
           </div>
           <div class="flex flex-col sm:flex-row items-end sm:items-center gap-4">
-            <!-- ปุ่มเปิดประวัติการลบ -->
             <button id="btn-open-trash" class="canva-button bg-red-50 text-red-700 border border-red-200 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold shadow-sm transition hover:bg-red-100 focus:outline-none">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
               <span>ประวัติการลบ</span>
@@ -175,10 +174,8 @@
       </div>
     </header>
 
-    <!-- ส่วนหลักของโปรแกรม (หน้าฟอร์มและตาราง) -->
     <div id="view-main" class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 block">
       
-      <!-- แบบฟอร์มกรอกข้อมูล -->
       <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden">
         <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -199,7 +196,6 @@
               <div><label class="canva-text field-label" for="asset-code">รหัสครุภัณฑ์</label> <input id="asset-code" class="field-control" type="text" required></div>
               <div><label class="canva-text field-label" for="asset-name">ชื่อครุภัณฑ์</label> <input id="asset-name" class="field-control" type="text" required></div>
               
-              <!-- ช่องหมวดหมู่ ปรับเปลี่ยนเป็นตัวเลือก Dropdown -->
               <div>
                 <label class="canva-text field-label" for="category">หมวดหมู่</label> 
                 <select id="category" class="field-control">
@@ -281,7 +277,6 @@
         </form>
       </section>
 
-      <!-- แสดงผลแบบตารางโฟลเดอร์ -->
       <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden mt-8" style="animation-delay: .1s;">
         <div class="px-5 sm:px-8 py-6 border-b border-teal-900/10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -328,7 +323,7 @@
       </section>
     </div>
 
-    <!-- ส่วนประวัติการลบ (Trash View) ซ่อนไว้ตอนเริ่มต้น -->
+    <!-- ส่วนประวัติการลบ (Trash View) -->
     <div id="view-trash" class="hidden w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       <section class="canva-panel paper-panel reveal rounded-3xl overflow-hidden">
         <div class="px-5 sm:px-8 py-6 border-b border-red-900/10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-red-50/50">
@@ -336,7 +331,7 @@
             <h2 class="canva-text section-title font-bold text-xl text-red-900 flex items-center gap-2">
               <i data-lucide="trash-2" class="w-6 h-6"></i> ประวัติการลบ (ถังขยะ)
             </h2>
-            <p class="canva-text mt-1 text-sm text-red-700">รายการที่ถูกลบจะอยู่ที่นี่ คุณสามารถกู้คืนหรือลบถาวรได้</p>
+            <p class="canva-text mt-1 text-sm text-red-700">รายการที่ถูกลบจะอยู่ที่นี่ การลบถาวรจะต้องระบุรหัสผ่าน 4 หลักเพื่อยืนยัน</p>
           </div>
           <button id="btn-back-main" class="canva-button bg-white border border-slate-300 text-slate-700 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition hover:bg-slate-50 focus:outline-none">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> กลับหน้าหลัก
@@ -373,7 +368,7 @@
 
   </div>
 
-  <!-- Modal สำหรับดูรายละเอียด (Modal View) -->
+  <!-- Modal สำหรับดูรายละเอียด -->
   <div id="view-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar reveal">
       <div class="sticky top-0 z-10 px-6 py-5 border-b border-teal-900/10 flex justify-between items-center bg-teal-50/95 backdrop-blur">
@@ -422,7 +417,7 @@
     </div>
   </div>
 
-  <!-- Modal ยืนยันการทำรายการ (Custom Confirmation Modal) -->
+  <!-- Modal ยืนยันการทำรายการทั่วไป -->
   <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 reveal text-center border border-teal-900/10">
       <div id="confirm-icon-bg" class="mx-auto w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-4">
@@ -441,11 +436,39 @@
     </div>
   </div>
 
+  <!-- Modal ยืนยันรหัสผ่าน 4 หลักสำหรับการลบถาวร -->
+  <div id="pin-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 reveal text-center border border-teal-900/10">
+      <div class="mx-auto w-14 h-14 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-3">
+        <i data-lucide="lock" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800 mb-1">ยืนยันการลบถาวร</h3>
+      <p id="pin-modal-subtitle" class="text-xs text-slate-500 mb-4">กรุณาระบุรหัสผ่าน 4 หลัก เพื่อลบรายการนี้ออกจากระบบถาวร</p>
+      
+      <div class="mb-4">
+        <input id="pin-input" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" class="w-40 text-center text-3xl font-extrabold tracking-[0.4em] py-2 border-2 border-red-200 rounded-2xl focus:border-red-500 focus:outline-none transition shadow-inner bg-red-50/30 text-red-900" placeholder="••••" autocomplete="off">
+        <p id="pin-error-msg" class="text-xs text-red-600 font-bold h-4 mt-2"></p>
+      </div>
+      
+      <div class="flex items-center justify-center gap-3">
+        <button id="pin-cancel-btn" type="button" class="w-1/2 px-4 py-2.5 rounded-xl font-bold border border-slate-300 text-slate-700 hover:bg-slate-50 transition text-sm">
+          ยกเลิก
+        </button>
+        <button id="pin-ok-btn" type="button" class="w-1/2 px-4 py-2.5 rounded-xl font-bold bg-red-600 text-white hover:bg-red-700 shadow-md transition text-sm">
+          ลบถาวร
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ----------------------------------------------------
     // REAL BACKEND SDK (Google Sheets API)
     // ----------------------------------------------------
     const API_URL = "https://script.google.com/macros/s/AKfycbyIEuHHVRBPpcn3G86muBCz50m6sXoKMvw5ro9zh177Nz8aT6hP_eP6oc0AQaz2BCbR/exec"; 
+
+    // **ตั้งค่ารหัสผ่าน 4 หลักสำหรับลบถาวรที่นี่**
+    const DELETE_PIN = "1234";
 
     window.dataSdk = {
       mockData: [],
@@ -534,11 +557,10 @@
         return { isOk: false };
       }
     };
-    // ----------------------------------------------------
 
     const state = { 
       records: [], 
-      deletedRecords: [], // เพิ่มเก็บประวัติการลบ
+      deletedRecords: [],
       isSaving: false, 
       editingId: null,
       expandedFolders: new Set()
@@ -588,7 +610,6 @@
       remarks: document.getElementById("remarks")
     };
 
-    // ฟังก์ชั่นแสดง Modal ยืนยัน (Custom Confirm Dialog)
     function showConfirmModal({ title, message, confirmText, confirmClass, onConfirm }) {
       const modal = document.getElementById("confirm-modal");
       const titleEl = document.getElementById("confirm-title");
@@ -622,7 +643,6 @@
       };
     }
 
-    // Navigation (สลับหน้าหลัก กับ หน้าประวัติการลบ)
     btnOpenTrash.addEventListener("click", () => {
       viewMain.classList.add("hidden");
       viewTrash.classList.remove("hidden");
@@ -882,7 +902,6 @@
             childTr.querySelector(".btn-inc-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", 1));
             childTr.querySelector(".btn-edit-item").addEventListener("click", () => populateFormForEdit(item));
 
-            // Soft Delete Action ใช้ Custom Confirm Modal
             childTr.querySelector(".btn-del-item").addEventListener("click", () => {
               showConfirmModal({
                 title: "ยืนยันการย้ายไปประวัติการลบ",
@@ -939,8 +958,8 @@
               <button type="button" onclick="restoreItem('${item.__backendId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition">
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 inline-block mr-1"></i> กู้คืน
               </button>
-              <button type="button" onclick="hardDeleteItem('${item.__backendId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition" title="ลบถาวร (กู้ไม่ได้)">
-                <i data-lucide="trash" class="w-3.5 h-3.5 inline-block"></i>
+              <button type="button" onclick="hardDeleteItem('${item.__backendId}')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition" title="ใส่รหัสผ่านเพื่อลบถาวร">
+                <i data-lucide="trash" class="w-3.5 h-3.5 inline-block mr-1"></i> ลบถาวร
               </button>
             </div>
           </td>
@@ -966,19 +985,49 @@
       }
     };
 
+    // **ระบบยืนยันรหัสผ่าน 4 หลักสำหรับการลบถาวร**
     window.hardDeleteItem = function(backendId) {
       const item = state.deletedRecords.find(r => r.__backendId === backendId);
-      if (item) {
-        showConfirmModal({
-          title: "คำเตือน: ลบรายการถาวร",
-          message: `คุณต้องการลบรายการ "${item.asset_name}" ถาวรหรือไม่? การกระทำนี้ไม่สามารถกู้คืนได้`,
-          confirmText: "ลบถาวร",
-          confirmClass: "bg-red-700 hover:bg-red-800",
-          onConfirm: async () => {
-            await window.dataSdk.delete(item);
-          }
-        });
-      }
+      if (!item) return;
+
+      const pinModal = document.getElementById("pin-modal");
+      const pinInput = document.getElementById("pin-input");
+      const pinError = document.getElementById("pin-error-msg");
+      const pinOkBtn = document.getElementById("pin-ok-btn");
+      const pinCancelBtn = document.getElementById("pin-cancel-btn");
+      const subtitle = document.getElementById("pin-modal-subtitle");
+
+      subtitle.textContent = `ระบุรหัส 4 หลักเพื่อลบ "${item.asset_name}" ถาวร`;
+      pinInput.value = "";
+      pinError.textContent = "";
+      pinModal.classList.remove("hidden");
+      
+      setTimeout(() => pinInput.focus(), 100);
+
+      const closePinModal = () => {
+        pinModal.classList.add("hidden");
+        pinOkBtn.onclick = null;
+        pinCancelBtn.onclick = null;
+        pinInput.onkeyup = null;
+      };
+
+      pinCancelBtn.onclick = closePinModal;
+
+      const verifyAndExecute = async () => {
+        if (pinInput.value === DELETE_PIN) {
+          closePinModal();
+          await window.dataSdk.delete(item);
+        } else {
+          pinError.textContent = "รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่";
+          pinInput.value = "";
+          pinInput.focus();
+        }
+      };
+
+      pinOkBtn.onclick = verifyAndExecute;
+      pinInput.onkeyup = (e) => {
+        if (e.key === "Enter") verifyAndExecute();
+      };
     };
 
     async function updateItemQty(item, field, delta) {
@@ -1164,7 +1213,6 @@
       onDataChanged(data) {
         if (!Array.isArray(data)) data = [];
         
-        // แยกข้อมูลที่ถูกลบ (Soft Deleted) และข้อมูลปกติ
         const active = data.filter(r => r.is_deleted !== true && r.is_deleted !== 'true');
         const deleted = data.filter(r => r.is_deleted === true || r.is_deleted === 'true');
 
