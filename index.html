@@ -417,6 +417,23 @@
     </div>
   </div>
 
+  <!-- Modal สำหรับดูประวัติการแก้ไข -->
+  <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto custom-scrollbar reveal p-6">
+      <div class="flex justify-between items-center border-b border-teal-900/10 pb-3 mb-4">
+        <h3 class="text-lg font-bold text-teal-900 font-['Eczar'] flex items-center gap-2">
+          <i data-lucide="history" class="w-5 h-5 text-amber-600"></i> ประวัติการแก้ไขรายการ
+        </h3>
+        <button id="close-history-modal-btn" class="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="history-modal-content" class="space-y-3">
+        <!-- ข้อมูลประวัติจะถูกใส่ด้วย JavaScript -->
+      </div>
+    </div>
+  </div>
+
   <!-- Modal ยืนยันการทำรายการทั่วไป -->
   <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-teal-900/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 reveal text-center border border-teal-900/10">
@@ -589,6 +606,9 @@
     
     const viewModal = document.getElementById("view-modal");
     const closeModalBtn = document.getElementById("close-modal-btn");
+
+    const historyModal = document.getElementById("history-modal");
+    const closeHistoryModalBtn = document.getElementById("close-history-modal-btn");
 
     const inputs = {
       department: document.getElementById("department"),
@@ -886,16 +906,20 @@
               <td class="px-4 py-3 text-xs text-slate-500">${formatDate(item.inspection_date, false)}</td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-1">
-                  <button type="button" class="btn-edit-item p-1.5 rounded-lg text-teal-700 bg-teal-50 hover:bg-teal-100" title="แก้ไขรายการนี้">
+                  <button type="button" class="btn-history-item p-1.5 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 transition" title="ดูประวัติการแก้ไข">
+                    <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" class="btn-edit-item p-1.5 rounded-lg text-teal-700 bg-teal-50 hover:bg-teal-100 transition" title="แก้ไขรายการนี้">
                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                   </button>
-                  <button type="button" class="btn-del-item p-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100" title="ย้ายไปถังขยะ">
+                  <button type="button" class="btn-del-item p-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition" title="ย้ายไปถังขยะ">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
               </td>
             `;
 
+            childTr.querySelector(".btn-history-item").addEventListener("click", () => openHistoryModal(item));
             childTr.querySelector(".btn-dec-good").addEventListener("click", () => updateItemQty(item, "good_qty", -1));
             childTr.querySelector(".btn-inc-good").addEventListener("click", () => updateItemQty(item, "good_qty", 1));
             childTr.querySelector(".btn-dec-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", -1));
@@ -924,6 +948,50 @@
 
       lucide.createIcons();
     }
+
+    function openHistoryModal(item) {
+      const historyContent = document.getElementById("history-modal-content");
+      const historyList = item.history || [];
+
+      if (historyList.length === 0) {
+        historyContent.innerHTML = `
+          <div class="text-center py-8 text-slate-500">
+            <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-2">
+              <i data-lucide="history" class="w-6 h-6"></i>
+            </div>
+            <p class="font-bold text-slate-700">ยังไม่มีประวัติการแก้ไข</p>
+            <p class="text-xs text-slate-500 mt-1">รายการนี้ยังไม่เคยถูกอัปเดตข้อมูล</p>
+          </div>`;
+      } else {
+        historyContent.innerHTML = historyList.slice().reverse().map((h, idx) => `
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-1.5">
+            <div class="flex justify-between items-center font-bold text-slate-700 border-b border-slate-200 pb-1.5">
+              <span class="flex items-center gap-1.5 text-teal-800">
+                <span class="w-2 h-2 rounded-full bg-teal-600"></span>
+                การแก้ไขครั้งที่ ${historyList.length - idx}
+              </span>
+              <span class="text-slate-500 font-normal">${formatDate(h.__editedAt)}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-slate-600">
+              <p><strong>ชื่อ:</strong> ${h.asset_name || '-'}</p>
+              <p><strong>รหัส:</strong> ${h.asset_code || '-'}</p>
+              <p><strong>หมวดหมู่:</strong> ${h.category || '-'}</p>
+              <p><strong>สภาพ:</strong> ${h.condition || '-'}</p>
+              <p><strong>ผู้ตรวจ:</strong> ${h.inspector || '-'}</p>
+              <p><strong>ผลตรวจ:</strong> ${h.inspection_result || '-'}</p>
+              <p class="col-span-2"><strong>จำนวน:</strong> ปกติ ${h.good_qty || 0}, ชำรุด ${h.damaged_qty || 0} (รวม ${h.actual_qty || 0})</p>
+              ${h.remarks ? `<p class="col-span-2 text-slate-500 italic"><strong>หมายเหตุ:</strong> ${h.remarks}</p>` : ''}
+            </div>
+          </div>
+        `).join("");
+      }
+
+      historyModal.classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    closeHistoryModalBtn.addEventListener("click", () => historyModal.classList.add("hidden"));
+    historyModal.addEventListener("click", (e) => { if (e.target === historyModal) historyModal.classList.add("hidden"); });
 
     function renderTrash() {
       trashListElement.innerHTML = "";
