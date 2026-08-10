@@ -188,7 +188,20 @@
               <div><label class="canva-text field-label" for="department">แผนก / หน่วยงาน</label> <input id="department" class="field-control" type="text" required></div>
               <div><label class="canva-text field-label" for="asset-code">รหัสครุภัณฑ์</label> <input id="asset-code" class="field-control" type="text" required></div>
               <div><label class="canva-text field-label" for="asset-name">ชื่อครุภัณฑ์</label> <input id="asset-name" class="field-control" type="text" required></div>
-              <div><label class="canva-text field-label" for="category">หมวดหมู่</label> <input id="category" class="field-control" type="text"></div>
+              
+              <!-- ช่องหมวดหมู่ ปรับเปลี่ยนเป็นตัวเลือก Dropdown -->
+              <div>
+                <label class="canva-text field-label" for="category">หมวดหมู่</label> 
+                <select id="category" class="field-control">
+                  <option value="">เลือกหมวดหมู่</option>
+                  <option value="ครุภัณฑ์สำนักงานทั่วไป (Office Funiture & Equipment)">1. ครุภัณฑ์สำนักงานทั่วไป (Office Funiture & Equipment)</option>
+                  <option value="ครุภัณฑ์คอมพิวเตอร์และเทคโนโลยีสารสนเทศ(IT & Computer Equipment)">2. ครุภัณฑ์คอมพิวเตอร์และเทคโนโลยีสารสนเทศ(IT & Computer Equipment)</option>
+                  <option value="ครุภัณฑ์งานพิมพ์และสำเนาเอกสาร(Printing & Copying Equipment)">3. ครุภัณฑ์งานพิมพ์และสำเนาเอกสาร(Printing & Copying Equipment)</option>
+                  <option value="ครุภัณฑ์ไฟฟ้าและเครื่องใช้ไฟฟ้าสำนักงาน(Electrical Appliances)">4. ครุภัณฑ์ไฟฟ้าและเครื่องใช้ไฟฟ้าสำนักงาน(Electrical Appliances)</option>
+                  <option value="ครุภัณฑ์โสตทัศนูปกรณ์และการสื่อสาร(Audio-Visual & Communication Equipment)">5. ครุภัณฑ์โสตทัศนูปกรณ์และการสื่อสาร(Audio-Visual & Communication Equipment)</option>
+                </select>
+              </div>
+
               <div><label class="canva-text field-label" for="brand-model">ยี่ห้อ / รุ่น</label> <input id="brand-model" class="field-control" type="text"></div>
               <div><label class="canva-text field-label" for="location">สถานที่ตั้ง</label> <input id="location" class="field-control" type="text"></div>
             </div>
@@ -454,7 +467,7 @@
       records: [], 
       isSaving: false, 
       editingId: null,
-      expandedFolders: new Set() // เก็บชื่อโฟลเดอร์ที่ถูกกดเปิด
+      expandedFolders: new Set()
     };
 
     const form = document.getElementById("asset-form");
@@ -559,9 +572,6 @@
       });
     }
 
-    // ----------------------------------------------------
-    // จัดกลุ่มรายการเป็น "โฟลเดอร์ผู้รับผิดชอบ"
-    // ----------------------------------------------------
     function getGroupedFolders() {
       const records = filteredRecords();
       const map = new Map();
@@ -607,9 +617,6 @@
       return folderList;
     }
 
-    // ----------------------------------------------------
-    // Rendering ตารางแบบ Folder / Accordion
-    // ----------------------------------------------------
     function renderFolders() {
       folderListElement.innerHTML = "";
       const folders = getGroupedFolders();
@@ -629,7 +636,6 @@
       folders.forEach((folder) => {
         const isExpanded = state.expandedFolders.has(folder.folderName);
         
-        // --- 1. แถวโฟลเดอร์หลัก (Main Folder Row) ---
         const folderTr = document.createElement("tr");
         folderTr.className = "folder-row font-medium shadow-sm border border-teal-800/10 rounded-xl";
 
@@ -668,7 +674,6 @@
           </td>
         `;
 
-        // ปุ่ม Toggle ขยาย/ย่อ โฟลเดอร์
         folderTr.querySelector(".toggle-folder-btn").addEventListener("click", () => {
           if (state.expandedFolders.has(folder.folderName)) {
             state.expandedFolders.delete(folder.folderName);
@@ -678,14 +683,12 @@
           renderFolders();
         });
 
-        // ปุ่มดูรายละเอียด Modal
         folderTr.querySelector(".view-folder-btn").addEventListener("click", () => {
           openFolderModal(folder);
         });
 
         folderListElement.appendChild(folderTr);
 
-        // --- 2. แถวรายการย่อยภายในโฟลเดอร์ (Child Asset Rows) ---
         if (isExpanded) {
           folder.items.forEach((item, idx) => {
             const childTr = document.createElement("tr");
@@ -742,16 +745,12 @@
               </td>
             `;
 
-            // ปุ่มปรับจำนวน (+/-)
             childTr.querySelector(".btn-dec-good").addEventListener("click", () => updateItemQty(item, "good_qty", -1));
             childTr.querySelector(".btn-inc-good").addEventListener("click", () => updateItemQty(item, "good_qty", 1));
             childTr.querySelector(".btn-dec-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", -1));
             childTr.querySelector(".btn-inc-dmg").addEventListener("click", () => updateItemQty(item, "damaged_qty", 1));
-
-            // ปุ่มแก้ไข
             childTr.querySelector(".btn-edit-item").addEventListener("click", () => populateFormForEdit(item));
 
-            // ปุ่มลบ
             childTr.querySelector(".btn-del-item").addEventListener("click", async () => {
               if (confirm(`ยืนยันการลบรายการ "${item.asset_name}" หรือไม่?`)) {
                 setStatus(listStatus, "กำลังลบรายการ...", "neutral");
@@ -903,7 +902,7 @@
         department: inputs.department.value.trim(),
         asset_code: inputs.assetCode.value.trim(),
         asset_name: inputs.assetName.value.trim(),
-        category: inputs.category.value.trim(),
+        category: inputs.category.value,
         brand_model: inputs.brandModel.value.trim(),
         location: inputs.location.value.trim(),
         condition: inputs.condition.value,
@@ -931,7 +930,6 @@
           : await window.dataSdk.create(record);
           
         if (result.isOk) {
-          // เปิดขยายโฟลเดอร์คนนี้ให้อัตโนมัติเมื่อบันทึกเสร็จ
           state.expandedFolders.add(record.responsible_person);
           resetForm();
           setStatus(formStatus, editingRecord ? "อัปเดตข้อมูลเรียบร้อยแล้ว" : "บันทึกข้อมูลเข้าโฟลเดอร์เรียบร้อยแล้ว", "success");
