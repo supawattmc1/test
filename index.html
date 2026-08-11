@@ -336,6 +336,16 @@
               <h3 class="canva-text mt-4 font-bold text-lg text-teal-900">ยังไม่มีโฟลเดอร์ในระบบ</h3>
               <p class="canva-text mt-1 text-sm text-teal-700">กรุณากรอกแบบฟอร์มด้านบนเพื่อสร้างโฟลเดอร์ผู้รับผิดชอบ</p>
             </div>
+
+            <!-- ปุ่มและตัวบอกจำนวนหน้า (Pagination Controls) -->
+            <div id="pagination-controls" class="hidden flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-teal-900/10">
+              <div class="text-xs text-slate-500 font-medium">
+                แสดงโฟลเดอร์ <span id="page-start-num" class="font-bold text-teal-900">0</span> ถึง <span id="page-end-num" class="font-bold text-teal-900">0</span> จากทั้งหมด <span id="page-total-num" class="font-bold text-teal-900">0</span> โฟลเดอร์
+              </div>
+              <div id="page-buttons" class="flex items-center gap-1.5 flex-wrap">
+                <!-- ปุ่มเลขหน้าจะถูกสร้างด้วย JavaScript -->
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -495,7 +505,7 @@
   </div>
 
   <script>
-     // ----------------------------------------------------
+    // ----------------------------------------------------
     // REAL BACKEND SDK (Google Sheets API)
     // ----------------------------------------------------
     const API_URL = "https://script.google.com/macros/s/AKfycbyIEuHHVRBPpcn3G86muBCz50m6sXoKMvw5ro9zh177Nz8aT6hP_eP6oc0AQaz2BCbR/exec"; 
@@ -591,7 +601,9 @@
       deletedRecords: [],
       isSaving: false, 
       editingId: null,
-      expandedFolders: new Set()
+      expandedFolders: new Set(),
+      currentPage: 1,      // หน้าปัจจุบัน
+      itemsPerPage: 10     // จำนวนโฟลเดอร์ต่อหน้า
     };
 
     const form = document.getElementById("asset-form");
@@ -829,6 +841,8 @@
         emptyState.classList.remove("hidden");
         recordCount.textContent = "0";
         folderCount.textContent = "0";
+        const paginationEl = document.getElementById("pagination-controls");
+        if (paginationEl) paginationEl.classList.add("hidden");
         setStatus(listStatus, "ไม่พบข้อมูลรายการตรวจนับ", "neutral");
         return;
       }
@@ -837,7 +851,22 @@
       recordCount.textContent = String(state.records.length);
       folderCount.textContent = String(folders.length);
 
-      folders.forEach((folder) => {
+      // --- คำนวณการแบ่งหน้า (Pagination) ---
+      const totalFolders = folders.length;
+      const totalPages = Math.ceil(totalFolders / state.itemsPerPage);
+
+      if (state.currentPage > totalPages) {
+        state.currentPage = 1;
+      }
+
+      const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+      const endIndex = Math.min(startIndex + state.itemsPerPage, totalFolders);
+      
+      // ตัดข้อมูลมาแสดงเฉพาะของหน้าที่เลือก
+      const paginatedFolders = folders.slice(startIndex, endIndex);
+
+      // แสดงผลโฟลเดอร์เฉพาะหน้าที่เลือก
+      paginatedFolders.forEach((folder) => {
         const isExpanded = state.expandedFolders.has(folder.folderName);
         
         const folderTr = document.createElement("tr");
@@ -979,7 +1008,83 @@
         }
       });
 
+      // แสดงแถบควบคุมการเปลี่ยนหน้า
+      renderPaginationControls(totalFolders, totalPages, startIndex + 1, endIndex);
+
       lucide.createIcons();
+    }
+
+    // ฟังก์ชันสร้างแถบควบคุมการเปลี่ยนหน้า (Pagination)
+    function renderPaginationControls(totalItems, totalPages, startNum, endNum) {
+      const container = document.getElementById("pagination-controls");
+      if (!container) return;
+
+      // ถ้าจำนวนโฟลเดอร์ไม่เกิน 10 ให้ซ่อนแถบเปลี่ยนหน้า
+      if (totalItems <= state.itemsPerPage) {
+        container.classList.add("hidden");
+        return;
+      }
+      container.classList.remove("hidden");
+
+      document.getElementById("page-start-num").textContent = startNum;
+      document.getElementById("page-end-num").textContent = endNum;
+      document.getElementById("page-total-num").textContent = totalItems;
+
+      const pageButtonsEl = document.getElementById("page-buttons");
+      pageButtonsEl.innerHTML = "";
+
+      // ปุ่มย้อนกลับ (ก่อนหน้า)
+      const prevBtn = document.createElement("button");
+      prevBtn.type = "button";
+      prevBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+        state.currentPage === 1 
+          ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+          : "bg-white text-teal-800 border border-teal-200 hover:bg-teal-50"
+      }`;
+      prevBtn.disabled = state.currentPage === 1;
+      prevBtn.innerHTML = `<i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> ก่อนหน้า`;
+      prevBtn.addEventListener("click", () => {
+        if (state.currentPage > 1) {
+          state.currentPage--;
+          renderFolders();
+        }
+      });
+      pageButtonsEl.appendChild(prevBtn);
+
+      // ปุ่มตัวเลขหน้า (1, 2, 3, ...)
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement("button");
+        pageBtn.type = "button";
+        pageBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+          i === state.currentPage
+            ? "bg-teal-800 text-white shadow-sm"
+            : "bg-white text-teal-800 border border-teal-200 hover:bg-teal-50"
+        }`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener("click", () => {
+          state.currentPage = i;
+          renderFolders();
+        });
+        pageButtonsEl.appendChild(pageBtn);
+      }
+
+      // ปุ่มถัดไป
+      const nextBtn = document.createElement("button");
+      nextBtn.type = "button";
+      nextBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+        state.currentPage === totalPages 
+          ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+          : "bg-white text-teal-800 border border-teal-200 hover:bg-teal-50"
+      }`;
+      nextBtn.disabled = state.currentPage === totalPages;
+      nextBtn.innerHTML = `ถัดไป <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>`;
+      nextBtn.addEventListener("click", () => {
+        if (state.currentPage < totalPages) {
+          state.currentPage++;
+          renderFolders();
+        }
+      });
+      pageButtonsEl.appendChild(nextBtn);
     }
 
     function openHistoryModal(item) {
@@ -1274,7 +1379,11 @@
       setStatus(formStatus, "ล้างข้อมูลแบบฟอร์มเรียบร้อย", "neutral");
     });
 
-    searchInput.addEventListener("input", renderFolders);
+    // เมื่อค้นหา ให้รีเซ็ตกลับมาที่หน้า 1
+    searchInput.addEventListener("input", () => {
+      state.currentPage = 1;
+      renderFolders();
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
