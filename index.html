@@ -192,12 +192,8 @@
           <section aria-labelledby="asset-info-heading">
             <h3 id="asset-info-heading" class="canva-text section-title font-bold border-l-4 border-teal-700 pl-3">ข้อมูลพื้นฐานครุภัณฑ์</h3>
             <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              <!-- <div>
-                <label class="canva-text field-label" for="department">แผนก / หน่วยงาน</label>
-                <input id="department" class="field-control" type="text" required></div> -->
-             <!-- แก้ไขตรงนี้ -->
-            <div>
-              <label class="canva-text field-label" for="department">แผนก / หน่วยงาน</label> 
+              <div>
+                <label class="canva-text field-label" for="department">แผนก / หน่วยงาน</label> 
                 <select id="department" class="field-control">
                   <option value="">เลือกฝ่าย</option>
                   <option value="ฝ่ายบริหารงานทั่วไป">1. ฝ่ายบริหารงานทั่วไป </option>
@@ -207,8 +203,11 @@
                   <option value="ฝ่ายประชาสัมพันธ์">5. ฝ่ายประชาสัมพันธ์</option>
                   <option value="ฝ่ายจริยธรรมและกฎหมาย">6. ฝ่ายจริยธรรมและกฎหมาย</option>
                   <option value="อื่นๆ">7. อื่นๆ</option>
-               </select>
-             </div>
+                </select>
+                <!-- ช่องสำหรับกรอกแผนกอื่นๆ -->
+                <input id="department-other" class="field-control mt-2 hidden" type="text" placeholder="ระบุชื่อแผนก / หน่วยงานอื่นๆ...">
+              </div>
+              
               <div><label class="canva-text field-label" for="asset-code">รหัสครุภัณฑ์</label> <input id="asset-code" class="field-control" type="text" required></div>
               <div><label class="canva-text field-label" for="asset-name">ชื่อครุภัณฑ์</label> <input id="asset-name" class="field-control" type="text" required></div>
               
@@ -221,8 +220,10 @@
                   <option value="ครุภัณฑ์งานพิมพ์และสำเนาเอกสาร(Printing & Copying Equipment)">3. ครุภัณฑ์งานพิมพ์และสำเนาเอกสาร(Printing & Copying Equipment)</option>
                   <option value="ครุภัณฑ์ไฟฟ้าและเครื่องใช้ไฟฟ้าสำนักงาน(Electrical Appliances)">4. ครุภัณฑ์ไฟฟ้าและเครื่องใช้ไฟฟ้าสำนักงาน(Electrical Appliances)</option>
                   <option value="ครุภัณฑ์โสตทัศนูปกรณ์และการสื่อสาร(Audio-Visual & Communication Equipment)">5. ครุภัณฑ์โสตทัศนูปกรณ์และการสื่อสาร(Audio-Visual & Communication Equipment)</option>
-                   <option value="อื่นๆ">6. อื่นๆ</option>
+                  <option value="อื่นๆ">6. อื่นๆ</option>
                 </select>
+                <!-- ช่องสำหรับกรอกหมวดไม่อื่นๆ -->
+                <input id="category-other" class="field-control mt-2 hidden" type="text" placeholder="ระบุหมวดหมู่อื่นๆ...">
               </div>
 
               <div><label class="canva-text field-label" for="brand-model">ยี่ห้อ / รุ่น</label> <input id="brand-model" class="field-control" type="text"></div>
@@ -445,9 +446,7 @@
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <div id="history-modal-content" class="space-y-3">
-        <!-- ข้อมูลประวัติจะถูกใส่ด้วย JavaScript -->
-      </div>
+      <div id="history-modal-content" class="space-y-3"></div>
     </div>
   </div>
 
@@ -496,17 +495,11 @@
   </div>
 
   <script>
-    // ----------------------------------------------------
-    // REAL BACKEND SDK (Google Sheets API)
-    // ----------------------------------------------------
     const API_URL = "https://script.google.com/macros/s/AKfycbyIEuHHVRBPpcn3G86muBCz50m6sXoKMvw5ro9zh177Nz8aT6hP_eP6oc0AQaz2BCbR/exec"; 
-
-    // **ตั้งค่ารหัสผ่าน 4 หลักสำหรับลบถาวรที่นี่**
     const DELETE_PIN = "1234";
 
     window.dataSdk = {
       mockData: [],
-      
       async init(handler) {
         this.handler = handler;
         try {
@@ -518,7 +511,6 @@
             return { isOk: true };
           }
         } catch (e) { console.error("Init Error:", e); }
-        
         this.handler.onDataChanged([]);
         return { isOk: false };
       },
@@ -533,7 +525,6 @@
             body: JSON.stringify({ action: 'create', record: record })
           });
           const result = await res.json();
-          
           if (result.status === 'success') {
             this.mockData.unshift(result.record);
             this.handler.onDataChanged(this.mockData);
@@ -562,7 +553,6 @@
             body: JSON.stringify({ action: 'update', record: record })
           });
           const result = await res.json();
-          
           if (result.status === 'success') {
             if (idx > -1) this.mockData[idx] = record;
             this.handler.onDataChanged(this.mockData);
@@ -581,7 +571,6 @@
             body: JSON.stringify({ action: 'delete', record: record })
           });
           const result = await res.json();
-          
           if (result.status === 'success') {
             this.mockData = this.mockData.filter(r => r.__backendId !== record.__backendId);
             this.handler.onDataChanged(this.mockData);
@@ -623,15 +612,16 @@
     
     const viewModal = document.getElementById("view-modal");
     const closeModalBtn = document.getElementById("close-modal-btn");
-
     const historyModal = document.getElementById("history-modal");
     const closeHistoryModalBtn = document.getElementById("close-history-modal-btn");
 
     const inputs = {
       department: document.getElementById("department"),
+      departmentOther: document.getElementById("department-other"),
       assetCode: document.getElementById("asset-code"),
       assetName: document.getElementById("asset-name"),
       category: document.getElementById("category"),
+      categoryOther: document.getElementById("category-other"),
       brandModel: document.getElementById("brand-model"),
       location: document.getElementById("location"),
       condition: document.getElementById("condition"),
@@ -646,6 +636,27 @@
       relatedRemarks: document.getElementById("related-remarks"),
       remarks: document.getElementById("remarks")
     };
+
+    // --- เพิ่ม Event Listeners ตรวจจับการกดเลือก "อื่นๆ" ---
+    inputs.department.addEventListener("change", () => {
+      if (inputs.department.value === "อื่นๆ") {
+        inputs.departmentOther.classList.remove("hidden");
+        inputs.departmentOther.focus();
+      } else {
+        inputs.departmentOther.classList.add("hidden");
+        inputs.departmentOther.value = "";
+      }
+    });
+
+    inputs.category.addEventListener("change", () => {
+      if (inputs.category.value === "อื่นๆ") {
+        inputs.categoryOther.classList.remove("hidden");
+        inputs.categoryOther.focus();
+      } else {
+        inputs.categoryOther.classList.add("hidden");
+        inputs.categoryOther.value = "";
+      }
+    });
 
     function showConfirmModal({ title, message, confirmText, confirmClass, onConfirm }) {
       const modal = document.getElementById("confirm-modal");
@@ -1070,7 +1081,6 @@
       }
     };
 
-    // **ระบบยืนยันรหัสผ่าน 4 หลักสำหรับการลบถาวร**
     window.hardDeleteItem = function(backendId) {
       const item = state.deletedRecords.find(r => r.__backendId === backendId);
       if (!item) return;
@@ -1136,11 +1146,34 @@
       await window.dataSdk.update(updated);
     }
 
+    // --- ปรับแต่งฟังก์ชันสำหรับการแก้ไขข้อมูลเมื่อมีการเลือก "อื่นๆ" ---
     function populateFormForEdit(record) {
-      inputs.department.value = record.department || "";
+      // ตรวจสอบข้อมูลแผนก
+      const deptOptionExists = Array.from(inputs.department.options).some(opt => opt.value === record.department);
+      if (deptOptionExists && record.department !== "อื่นๆ") {
+        inputs.department.value = record.department || "";
+        inputs.departmentOther.classList.add("hidden");
+        inputs.departmentOther.value = "";
+      } else if (record.department) {
+        inputs.department.value = "อื่นๆ";
+        inputs.departmentOther.classList.remove("hidden");
+        inputs.departmentOther.value = record.department;
+      }
+
+      // ตรวจสอบข้อมูลหมวดหมู่
+      const catOptionExists = Array.from(inputs.category.options).some(opt => opt.value === record.category);
+      if (catOptionExists && record.category !== "อื่นๆ") {
+        inputs.category.value = record.category || "";
+        inputs.categoryOther.classList.add("hidden");
+        inputs.categoryOther.value = "";
+      } else if (record.category) {
+        inputs.category.value = "อื่นๆ";
+        inputs.categoryOther.classList.remove("hidden");
+        inputs.categoryOther.value = record.category;
+      }
+
       inputs.assetCode.value = record.asset_code || "";
       inputs.assetName.value = record.asset_name || "";
-      inputs.category.value = record.category || "";
       inputs.brandModel.value = record.brand_model || "";
       inputs.location.value = record.location || "";
       inputs.condition.value = record.condition || "";
@@ -1213,6 +1246,13 @@
     function resetForm() {
       state.editingId = null;
       form.reset();
+      
+      // ซ่อนช่องกรอก "อื่นๆ"
+      inputs.departmentOther.classList.add("hidden");
+      inputs.categoryOther.classList.add("hidden");
+      inputs.departmentOther.value = "";
+      inputs.categoryOther.value = "";
+
       inputs.goodQty.value = "1";
       inputs.damagedQty.value = "0";
       inputs.totalQty.value = "1";
@@ -1246,11 +1286,20 @@
       const good = Number(inputs.goodQty.value || 0);
       const damaged = Number(inputs.damagedQty.value || 0);
 
+      // --- ดึงค่าแผนกและหมวดหมู่ (หากเลือกอื่นๆ ให้เอาค่าจากช่องพิมพ์) ---
+      const selectedDept = inputs.department.value === "อื่นๆ" 
+        ? (inputs.departmentOther.value.trim() || "อื่นๆ")
+        : inputs.department.value.trim();
+
+      const selectedCat = inputs.category.value === "อื่นๆ"
+        ? (inputs.categoryOther.value.trim() || "อื่นๆ")
+        : inputs.category.value;
+
       const record = {
-        department: inputs.department.value.trim(),
+        department: selectedDept,
         asset_code: inputs.assetCode.value.trim(),
         asset_name: inputs.assetName.value.trim(),
-        category: inputs.category.value,
+        category: selectedCat,
         brand_model: inputs.brandModel.value.trim(),
         location: inputs.location.value.trim(),
         condition: inputs.condition.value,
